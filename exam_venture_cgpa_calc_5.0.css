@@ -1,0 +1,531 @@
+/* 1. CORE THEME & LAYOUT */
+:root {
+    --bg: #0b0e14;
+    --card: #161b22;
+    --accent: #fbbf24; /* UI/EEE Gold */
+    --text: #ffffff;
+    --text-dim: #8b949e;
+    --nav-navy: #1e293b;
+    --sidebar-bg: #020617;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    overflow-x: hidden;
+}
+
+/* 2. TOP BAR & CONSTANT NAVIGATION */
+.top-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 70px;
+    background: rgba(11, 14, 20, 0.8); /* Match your --bg with transparency */
+    backdrop-filter: blur(12px); /* This creates the 'Elite' frosted glass effect */
+    -webkit-backdrop-filter: blur(12px);
+    z-index: 1400;
+    display: flex;
+    align-items: center;
+    padding: 0 20px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle line */
+}
+
+.app-logo-text {
+    margin-left: 60px; /* Space for the hamburger button */
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--text);
+}
+
+.constant-menu-btn {
+    position: absolute;
+    left: 15px;
+    width: 45px;
+    height: 45px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: 0.3s;
+}
+
+.hamburger-icon span {
+    display: block;
+    width: 22px;
+    height: 2px;
+    background: #fff;
+    margin: 3px 0;
+    border-radius: 2px;
+}
+
+/* 3. MAIN CONTENT CONTAINER (The "Buffer" Fix) */
+.app-container {
+    width: 100%;          /* Uses 100% of the phone's width */
+    max-width: 500px;     /* Only limits size on large tablets/desktops */
+    margin: 0 auto;
+    padding: 30px;
+    padding-top: 100px;   /* Pushes content below your top bar */
+    padding-bottom: 110px; /* Leaves space for the ad bar */
+    padding-left: 24px; 
+    padding-right: 24px;
+    padding-top: 100px;
+    padding-bottom: 120px;
+}
+
+/* 4. SIDEBAR & OVERLAY */
+.sidebar {
+    height: 100vh;
+    width: 280px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: var(--sidebar-bg);
+    z-index: 2000; /* Highest priority */
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid #1e293b;
+}
+
+.sidebar.active { transform: translateX(0); }
+
+.overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1500;
+    backdrop-filter: blur(4px);
+}
+
+/* 5. SIDEBAR NAVIGATION ITEMS */
+.sidebar-nav {
+    flex: 1;
+    padding: 20px 10px;
+    overflow-y: auto;
+}
+
+.nav-item {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    margin-bottom: 8px;
+    border-radius: 12px;
+    cursor: pointer;
+    color: #94a3b8;
+    transition: 0.2s;
+}
+
+.nav-item.active {
+    background: rgba(251, 191, 36, 0.1); /* Light gold glow */
+    color: var(--accent);
+    border-left: 4px solid var(--accent); /* Indicates current selection clearly */
+}
+
+.nav-item .icon {
+    font-size: 1.5rem;
+    margin-right: 15px;
+    width: 30px;
+    text-align: center;
+}
+
+/* 6. CARDS & UI ELEMENTS */
+.stats-card {
+    background: var(--card);
+    border-radius: 24px;
+    padding: 30px;
+    text-align: center;
+    margin-bottom: 20px;
+    border: 1px solid rgba(255,255,255,0.05);
+}
+
+#display-cgpa {
+    font-size: 4rem;
+    font-weight: 800;
+    color: var(--accent);
+}
+
+.badge {
+    background: rgba(251, 191, 36, 0.1);
+    color: var(--accent);
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+/* 7. FORM INPUTS (Course Rows) */
+.course-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    width: 100%;          /* Stretches to fit the container */
+    align-items: center;
+}
+
+.course-row input, .course-row select {
+    background: #1c2128;
+    border: 1px solid #30363d;
+    color: white;
+    padding: 5px;
+    border-radius: 8px;
+    outline: none;
+}
+
+.inp-code { flex: 3; }
+.inp-unit, .inp-grade { flex: 1.5; }
+
+/* 8. AD HOUSE (Bottom Sticky) */
+.ad-house {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    min-height: 60px;
+    background: #000;
+    z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-top: 1px solid #1e293b;
+}
+
+/* Animations */
+.view { display: none; animation: fadeIn 0.3s ease; }
+.view.active { display: block; }
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+/* ELITE BUTTON STYLES */
+.btn-back {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: var(--text-dim);
+    padding: 8px 16px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: 0.2s;
+}
+
+.btn-back:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text);
+}
+
+.btn-secondary {
+    background: #1c2128;
+    border: 1px solid #30363d;
+    color: var(--text);
+    padding: 12px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-secondary:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+}
+
+/* ELITE SELECT & INPUT STYLES */
+.inp-select-pro, #sem-select {
+    width: 100%;
+    background: #1c2128;
+    border: 1px solid #30363d;
+    color: var(--text);
+    padding: 14px;
+    border-radius: 12px;
+    font-size: 1rem;
+    outline: none;
+    appearance: none; /* Removes default browser arrow */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%238b949e' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 18px;
+}
+
+/* SPACING ADJUSTMENTS */
+.selection-group label {
+    display: block;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-bottom: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* 4. COURSE ROWS (Prevents Cutting) */
+.course-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    width: 100%;
+    align-items: center;
+}
+
+.course-row input, .course-row select {
+    background: #1c2128;
+    border: 1px solid #30363d;
+    color: white;
+    padding: 12px 8px; /* Bigger tap area for mobile */
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+    min-width: 0; /* CRITICAL: Allows inputs to shrink to fit screen */
+}
+
+.inp-code { flex: 3; }
+.inp-unit { flex: 1.2; }
+.inp-grade { flex: 1.5; }
+
+/* 5. ELITE BUTTONS */
+.btn-save {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 700;
+    width: 100%; /* Full width buttons look better on mobile */
+    cursor: pointer;
+}
+
+.action-bar {
+    display: flex;
+    flex-direction: column; /* Stack buttons on mobile to prevent cutting */
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.btn-secondary {
+    background: #1c2128;
+    border: 1px solid #30363d;
+    color: var(--text);
+    padding: 14px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+/* Update these sidebar styles */
+#side-menu.sidebar {
+    padding: 24px; /* Pushes profile text and nav away from the walls */
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar-links {
+    margin-top: auto;
+    padding-bottom: 20px; /* Keeps footer away from the very bottom */
+}
+
+.btn-reset-sidebar {
+    width: 100%;
+    margin-bottom: 10px;
+    padding: 12px;
+    background-color: red;
+    /* Add a subtle margin so it doesn't touch the sidebar's own edge */
+}
+.btn-reset-sidebar {
+    width: 100%;
+    background: rgba(255, 68, 68, 0.1); /* Subtle red tint */
+    color: #ff4444; /* Bright red text */
+    border: 1px solid rgba(255, 68, 68, 0.3);
+    padding: 12px;
+    border-radius: 10px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+    margin-top: 10px;
+}
+
+.btn-reset-sidebar:hover {
+    background: #ff4444;
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 68, 68, 0.4);
+}
+
+.profile-pic {
+    width: 50px; height: 50px;
+    background: var(--accent);
+    color: #000;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; font-size: 1.2rem; margin-bottom: 10px;
+}
+.profile-trigger {
+    display: flex;
+    align-items: center;
+    padding: 15px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.profile-trigger:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+}
+
+.progress-container {
+    width: 100%;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #fcd34d);
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.3);
+    transition: width 1s ease-in-out;
+}
+
+.course-row {
+    will-change: transform, opacity; /* Optimizes mobile performance */
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    align-items: center;
+}
+
+/* Styling for the new delete button in the cards */
+.stats-card button:active {
+    transform: scale(0.9);
+    opacity: 0.6;
+}
+
+/* Ensure the cards don't feel too cramped with the icon */
+.stats-card div[style*="display: flex"] {
+    min-height: 40px;
+}
+.course-row {
+    will-change: transform, opacity; /* Optimizes mobile performance */
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
+    align-items: center;
+}
+
+/* Ensure inputs are clean and don't have default browser styling */
+.inp-code {
+    text-transform: uppercase; /* Fallback: also makes the text appear uppercase visually */
+    font-weight: 600;
+}
+
+/* 1. Login View Styling */
+#view-login.active {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--bg);
+    z-index: 2000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 20px;
+}
+
+.login-card {
+    text-align: center;
+    max-width: 350px;
+    width: 100%;
+}
+
+.lock-icon {
+    font-size: 3rem;
+    margin-bottom: 15px;
+}
+
+#login-pin {
+    display: block;
+    margin: 20px auto;
+    text-align: center;
+    font-size: 2.5rem;
+    letter-spacing: 10px;
+    width: 180px;
+    background: #000;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    border-radius: 12px;
+    padding: 10px;
+}
+
+/* 2. Hide Navigation when Locked */
+#view-login.active ~ .top-bar,
+#view-login.active ~ #ad-container-bottom {
+    display: none !important;
+}
+/* This makes the login screen a solid wall */
+#view-login.active {
+    background-color: #0d1117 !important; /* Matches your dark theme */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9999;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+}
+/* Styling for the new About Link */
+.nav-item-link {
+    text-decoration: none; /* Removes the underline */
+    color: inherit;       /* Keeps your white/gold text colors */
+    display: block;        /* Makes the whole area clickable */
+    width: 100%;
+}
+
+/* Ensure the hover effect still works perfectly */
+.nav-item-link:hover .nav-item {
+    background: rgba(251, 191, 36, 0.1);
+    border-left: 4px solid var(--accent);
+    cursor: pointer;
+}
+
+/* Adjusting the text layout to match your EEE theme */
+.nav-text {
+    display: flex;
+    flex-direction: column;
+    margin-left: 12px;
+}
+
+.nav-text strong {
+    font-size: 0.95rem;
+    color: var(--text);
+}
+
+.nav-text small {
+    font-size: 0.7rem;
+    color: var(--text-dim);
+}
+/* Force hide the Top Bar and Ads when Login is active */
+#view-login.active ~ .top-bar,
+#view-login.active ~ #ad-container-bottom,
+body:has(#view-login.active) .top-bar {
+    display: none !important;
+}
+
+
+

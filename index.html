@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Venture | Loading...</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0b0e14;
+            --accent: #fbbf24;
+        }
+
+        body {
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            font-family: 'Inter', sans-serif;
+            overflow: hidden;
+        }
+
+        .splash-container {
+            text-align: center;
+            animation: fadeIn 1.2s ease-in-out;
+        }
+
+        /* Your logo4.png styling */
+        .main-logo {
+            width: 120px; /* Adjust size as needed */
+            height: auto;
+            margin-bottom: 20px;
+            /* Subtle glow effect */
+            filter: drop-shadow(0 0 10px rgba(251, 191, 36, 0.3));
+        }
+
+        .brand-name {
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-bottom: 10px;
+        }
+
+        .brand-name span {
+            color: var(--accent);
+        }
+
+        /* Minimal loading bar */
+        .loader-bar {
+            width: 150px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            margin: 20px auto;
+            position: relative;
+            overflow: hidden;
+            border-radius: 2px;
+        }
+
+        .loader-progress {
+            position: absolute;
+            width: 0%;
+            height: 100%;
+            background: var(--accent);
+            animation: loadProgress 2.5s forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes loadProgress {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="splash-container">
+        <img src="logo4.png" alt="Exam Venture Logo" class="main-logo">
+        
+        <div class="brand-name">EXAM <span>VENTURE</span></div>
+        
+        <div class="loader-bar">
+            <div class="loader-progress"></div>
+        </div>
+    </div>
+
+    <script>
+        // Automatically redirect to the choice scale page after 3 seconds
+        setTimeout(() => {
+            window.location.href = 'choice_scale.html';
+        }, 3000);
+    </script>
+
+</body>
+</html>
