@@ -246,14 +246,12 @@ function calculateTarget() {
 
     let currentPoints = 0;
     let currentUnits = 0;
-    let historyAudit = [];
     let asCount = 0;
     let bsCount = 0;
 
-    // --- FIXED STEP 1: Using the correct 'data4-' prefix ---
+    // --- STEP 1: DEEP AUDIT OF THE JOURNEY (Strictly data4-) ---
     Object.keys(localStorage).filter(k => k.startsWith("data4-")).sort().forEach(key => {
         const semesterData = JSON.parse(localStorage.getItem(key));
-        const semLabel = key.replace('data4-', '').replace('-', ' Level ');
         
         semesterData.forEach(c => {
             const u = parseFloat(c.unit || c.units || 0);
@@ -261,14 +259,8 @@ function calculateTarget() {
             if (u > 0) {
                 currentUnits += u;
                 currentPoints += (u * g);
-                if(g === 4) asCount++; 
-                if(g === 3) bsCount++; 
-                historyAudit.push({ 
-                    code: c.code || 'Course', 
-                    unit: u, 
-                    grade: g, 
-                    sem: semLabel 
-                });
+                if(g === 4) asCount++; // A on a 4.0 scale
+                if(g === 3) bsCount++; // B on a 4.0 scale
             }
         });
     });
@@ -277,36 +269,43 @@ function calculateTarget() {
     const remainingUnits = parseFloat(remainingUnitsInput.value);
     const totalUnitsFinal = currentUnits + remainingUnits;
     const currentCGPA = currentUnits > 0 ? (currentPoints / currentUnits).toFixed(2) : "0.00";
+    
+    // Core Calculations
     const totalPointsNeeded = goal * totalUnitsFinal;
     const pointsToEarn = totalPointsNeeded - currentPoints;
     const requiredGPA = (pointsToEarn / remainingUnits).toFixed(2);
     
-    const maxPossible = ((currentPoints + (remainingUnits * 4)) / totalUnitsFinal).toFixed(2);
+    // Reality Check Calculations (Max is 4.0)
+    const maxPossiblePoints = currentPoints + (remainingUnits * 4); 
+    const maxPossibleCGPA = (maxPossiblePoints / totalUnitsFinal).toFixed(2);
 
     resultDiv.style.display = "block";
     
-    // --- STEP 3: OUTPUT ---
-    let greeting = "Hey Champ! 👋";
-    if (currentCGPA >= 3.5) greeting = "Wow, a First Class Scholar! 🚀"; 
-    else if (currentCGPA >= 3.0) greeting = "Solid work so far! 🙌";
+    // --- STEP 3: CONVERSATIONAL ENGINE & UI ---
+    
+    // Dynamic Greeting for 4.0 scale
+    let greeting = "Hello Champ! 👋";
+    if (currentCGPA >= 3.5) greeting = "First Class Scholar in the building! 🚀";
+    else if (currentCGPA >= 3.0) greeting = "Solid work so far! Let's push higher. 🙌";
 
     let html = `<h2 style="color:var(--accent); font-size:1.2rem; margin-bottom:10px;">${greeting}</h2>`;
     html += `<p style="font-size:0.85rem; line-height:1.5; color:#e6edf3;">
-                I've audited your <b>${currentUnits} units</b> of academic history. 
-                You've bagged <b>${asCount} As</b> and <b>${bsCount} Bs</b>. 
-                Here is your roadmap to a <b>${goal} CGPA</b>.
+                I've audited your <b>${currentUnits} units</b> of history. 
+                With <b>${asCount} As</b> and <b>${bsCount} Bs</b> secured, here is your strategic roadmap to a <b>${goal} CGPA</b>.
              </p>`;
 
-    // Difficulty Logic
-    let statusTheme = { label: "MODERATE", color: "#34d399", msg: "This is very doable with a good study plan!" };
-    if (requiredGPA > 4.0) statusTheme = { label: "IMPOSSIBLE", color: "#ff4444", msg: "Mathematically, we can't hit this goal anymore." };
-    else if (requiredGPA > 3.7) statusTheme = { label: "ELITE MODE", color: "#fbbf24", msg: "This requires absolute focus!" };
+    // Difficulty & Status Card Logic (Adjusted for 4.0)
+    let statusTheme = { label: "MODERATE", color: "#34d399", msg: "Very achievable with a structured study plan." };
+    if (requiredGPA > 4.0) statusTheme = { label: "IMPOSSIBLE", color: "#ff4444", msg: "Mathematically, this specific target is out of reach." };
+    else if (requiredGPA > 3.7) statusTheme = { label: "ELITE MODE", color: "#fbbf24", msg: "Zero margin for error. Maximum focus required." };
+    else if (requiredGPA > 3.0) statusTheme = { label: "HARD MODE", color: "#60a5fa", msg: "Consistent high performance is mandatory." };
 
+    // The Current Standing Visual
     html += `
-        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin:20px 0; border:1px solid #30363d;">
+        <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin:20px 0; border:1px solid rgba(255,255,255,0.1); position:relative; overflow:hidden;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
                 <div>
-                    <small style="color:var(--text-dim); font-size:0.7rem; text-transform:uppercase;">Current Standing</small>
+                    <small style="color:var(--text-dim); font-size:0.7rem; text-transform:uppercase; letter-spacing:1px;">Current Standing</small>
                     <p style="font-size:2.2rem; font-weight:bold; margin:0;">${currentCGPA}</p>
                 </div>
                 <span style="background:${statusTheme.color}; color:#000; padding:4px 10px; border-radius:6px; font-size:0.65rem; font-weight:bold;">${statusTheme.label}</span>
@@ -315,25 +314,80 @@ function calculateTarget() {
         </div>
     `;
 
-    if (requiredGPA <= 4.0) {
-        let unitsA = Math.max(0, Math.ceil(pointsToEarn - (3 * remainingUnits)));
-        let unitsB = Math.max(0, remainingUnits - unitsA);
+    // --- STEP 4: THE STRATEGY SPLIT (Impossible vs. Possible) ---
+    if (requiredGPA > 4.0) {
+        // The Reality Check Warning (4.0 Max)
+        html += `
+            <div style="background:rgba(255,68,68,0.05); padding:15px; border-radius:10px; border-left:4px solid #ff4444; margin-bottom: 15px;">
+                <p style="font-weight:bold; color:#ff4444; margin-bottom:8px; font-size: 0.9rem;">System Reality Check</p>
+                <p style="font-size:0.8rem; line-height:1.5; color:#e6edf3;">
+                    To reach a ${goal}, you'd need to average a <b>${requiredGPA} GPA</b> across your remaining units. Since the maximum GPA is 4.0, this exact target isn't mathematically possible anymore.
+                </p>
+            </div>
+            
+            <div style="background:#1c2128; padding:15px; border-radius:10px; border:1px solid var(--accent);">
+                <p style="font-size:0.8rem; font-weight:bold; color:var(--accent); margin-bottom:5px;">Your New Max Potential</p>
+                <p style="font-size:0.85rem; line-height:1.4;">
+                    If you secure a perfect 4.0 in every single remaining course, you will graduate with a <b>${maxPossibleCGPA} CGPA</b>. Should we set that as the new target?
+                </p>
+            </div>`;
+    } else {
+        // The Grade Mix Optimizer (Actionable Strategy for 4.0 Scale)
+        // Logic: 4A + 3B = pointsToEarn
+        // A + B = remainingUnits
+        // Therefore: A = pointsToEarn - 3*remainingUnits
+        let minUnitsA = Math.ceil(pointsToEarn - (3 * remainingUnits));
+        
+        // Handle cases where the required GPA is low enough that they don't *need* As
+        if (minUnitsA < 0) minUnitsA = 0; 
+        
+        // If the formula requires more As than total remaining units, they need 100% As
+        if (minUnitsA > remainingUnits) minUnitsA = remainingUnits;
+
+        let maxUnitsB = Math.floor(remainingUnits - minUnitsA);
 
         html += `
-            <div style="background:#21262d; padding:15px; border-radius:12px; border:1px solid #30363d;">
-                <p style="font-size:0.8rem; font-weight:bold; margin-bottom:12px;">🎯 Target: ${requiredGPA} GPA</p>
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-                    <div style="background:rgba(52, 211, 153, 0.1); padding:10px; border-radius:8px; border:1px solid rgba(52, 211, 153, 0.2);">
-                        <small style="color:#34d399; display:block;">Must be 'A'</small>
-                        <b style="font-size:1.1rem;">${unitsA} Units</b>
+            <h3 style="font-size:1rem; margin-bottom:12px; color:var(--accent); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">The Strategy 🎮</h3>
+            <p style="font-size:0.85rem; margin-bottom:15px;">
+                To graduate with your target, you must maintain an average of <b>${requiredGPA} GPA</b> across your remaining <b>${remainingUnits} units</b>.
+            </p>
+
+            <div style="background:#161b22; padding:15px; border-radius:12px; border:1px solid #30363d; margin-bottom:20px;">
+                <p style="font-size:0.8rem; font-weight:bold; margin-bottom:15px; color:#e6edf3;">
+                    🎯 The Required Grade Mix
+                </p>
+                
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div style="background:rgba(52, 211, 153, 0.05); padding:12px; border-radius:8px; border:1px solid rgba(52, 211, 153, 0.3);">
+                        <small style="color:#34d399; display:block; margin-bottom:4px; font-weight:600;">Minimum 'A' Units</small>
+                        <b style="font-size:1.3rem; color:#fff;">${minUnitsA}</b>
                     </div>
-                    <div style="background:rgba(255, 255, 255, 0.05); padding:10px; border-radius:8px; border:1px solid #30363d;">
-                        <small style="color:var(--text-dim); display:block;">Can be 'B'</small>
-                        <b style="font-size:1.1rem;">${unitsB} Units</b>
+                    
+                    <div style="background:rgba(255, 255, 255, 0.02); padding:12px; border-radius:8px; border:1px solid #30363d;">
+                        <small style="color:var(--text-dim); display:block; margin-bottom:4px; font-weight:600;">Maximum 'B' Units</small>
+                        <b style="font-size:1.3rem; color:#fff;">${maxUnitsB}</b>
                     </div>
                 </div>
-            </div>`;
+            </div>
+
+            <div style="background:rgba(96, 165, 250, 0.05); padding:12px; border-radius:8px; border-left:3px solid #60a5fa;">
+                <p style="font-size:0.75rem; color:#e6edf3; line-height:1.4; margin:0;">
+                    <b>💡 Academic Consultant Tip:</b> Focus your "A" effort on 3-unit and 4-unit courses. Dropping to a 'B' or 'C' in a high-unit core course will severely damage this roadmap!
+                </p>
+            </div>
+        `;
     }
+
+    // --- STEP 5: INTERACTIVE "WHAT IF" FOOTER ---
+    html += `
+        <div style="margin-top:25px; border-top:1px solid #30363d; padding-top:15px; text-align:center;">
+            <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:12px;">Let's explore other possibilities.</p>
+            <button onclick="document.getElementById('goal-input').focus();" 
+                    style="background:transparent; border:1px solid var(--accent); color:var(--accent); padding:8px 20px; border-radius:8px; font-size:0.8rem; font-weight:600; cursor:pointer; transition:0.2s;">
+                Adjust Target CGPA
+            </button>
+        </div>
+    `;
 
     resultDiv.innerHTML = html;
 }
@@ -408,6 +462,31 @@ function exportToPDF() {
         });
         y += 15;
     });
+
+const pageHeight = doc.internal.pageSize.height;
+    
+    // 1. Decorative line at the bottom
+    doc.setDrawColor(230, 230, 230);
+    doc.line(20, pageHeight - 30, 190, pageHeight - 30);
+
+    // 2. The Verification Box (Bottom Left)
+    // x = 20 (Left margin), y = pageHeight - 25
+    doc.setFillColor(NAVY[0], NAVY[1], NAVY[2]);
+    doc.rect(20, pageHeight - 25, 45, 15, 'F'); 
+    
+    doc.setTextColor(GOLD[0], GOLD[1], GOLD[2]);
+    doc.setFontSize(7);
+    doc.setFont("helvetica", "bold");
+    doc.text("VERIFIED BY", 25, pageHeight - 19);
+    doc.setFontSize(9);
+    doc.text("EXAM VENTURE", 25, pageHeight - 14);
+
+    // 3. Timestamp (Right aligned to the seal)
+    doc.setFontSize(7);
+    doc.setTextColor(150, 150, 150);
+    doc.setFont("helvetica", "italic");
+    const date = new Date().toLocaleDateString();
+    doc.text(`Authentic Digital Record: ${date}`, 70, pageHeight - 14);
 
     doc.save(`Transcript_${profile.name || 'Student'}.pdf`);
 }
@@ -633,6 +712,74 @@ function updateRemainingUnitsDisplay() {
     
     // Auto-fill the Target Tracker input box
     remainingInput.value = remaining > 0 ? remaining : 0;
+}
+
+function toggleBulkInput() {
+    const area = document.getElementById('bulk-input-area');
+    if (area) {
+        area.style.display = area.style.display === 'none' ? 'block' : 'none';
+    }
+}
+
+function copyPrompt() {
+    const textElement = document.getElementById('ai-prompt-text');
+    const btn = document.querySelector('.btn-copy');
+    if (!textElement) return;
+
+    const textToCopy = textElement.innerText;
+
+    // Reliable copy method for mobile and desktop
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            updateCopyBtnStatus(btn);
+        }).catch(() => fallbackCopyText(textToCopy, btn));
+    } else {
+        fallbackCopyText(textToCopy, btn);
+    }
+}
+
+function fallbackCopyText(text, btn) {
+    const textArea = document.createElement("textarea");
+    textArea.value = text;
+    document.body.appendChild(textArea);
+    textArea.select();
+    try {
+        document.execCommand('copy');
+        updateCopyBtnStatus(btn);
+    } catch (err) {
+        console.error('Copy failed', err);
+    }
+    document.body.removeChild(textArea);
+}
+
+function updateCopyBtnStatus(btn) {
+    const originalText = btn.innerText;
+    btn.innerText = "Copied!";
+    btn.style.background = "#4caf50"; 
+    setTimeout(() => {
+        btn.innerText = originalText;
+        btn.style.background = "var(--accent)";
+    }, 2000);
+}
+
+function processBulkJSON() {
+    const rawData = document.getElementById('json-paste-area').value.trim();
+    
+    try {
+        const courses = JSON.parse(rawData);
+        if (!Array.isArray(courses)) throw new Error("Invalid Format");
+
+        courses.forEach(course => {
+            // Uses the 4.0 version's existing row rendering function
+            renderCourseRow(course.code, course.unit, course.grade);
+        });
+
+        alert(`Successfully imported ${courses.length} courses to your 4.0 list!`);
+        document.getElementById('json-paste-area').value = '';
+        toggleBulkInput(); 
+    } catch (e) {
+        alert("Please paste a valid JSON list from the AI (starting with [ and ending with ]).");
+    }
 }
 // 3. Ensure Top Bar stays hidden on load (4.0 Version)
 window.addEventListener('DOMContentLoaded', () => {
