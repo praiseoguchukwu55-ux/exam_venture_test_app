@@ -8,7 +8,21 @@
     <link rel="stylesheet" href="exam_venture_cgpa_calc_5.0.css">
 </head>
 <body>
-
+   <div id="ad-container-top" class="ad-house">
+        <div id="ad-slot">
+            <div id="ad-slot">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
+    <ins class="adsbygoogle"
+         style="display:inline-block;width:320px;height:50px"
+         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
+         data-ad-slot="XXXXXXXXXX"></ins>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
+</div>
+            </div>
+    </div>
+    </div>
     <div class="top-bar">
         <button id="open-sidebar" class="constant-menu-btn" onclick="toggleSidebar()">
             <div class="hamburger-icon">
@@ -213,6 +227,25 @@
                 <button class="btn-secondary" onclick="addCourseRow()">+ Add Course</button>
                 <button class="btn-save" onclick="saveSemesterData()">Save Semester</button>
             </div>
+<div class="bulk-import-section">
+    <button class="btn-bulk-toggle" onclick="toggleBulkInput()">
+        ✨ Bulk Import from AI Scan
+    </button>
+
+    <div id="bulk-input-area" class="bulk-drawer" style="display: none;">
+        <div class="ai-instruction-card">
+            <h4>Step 1: Copy AI Prompt</h4>
+            <div class="code-copy-box">
+                <code id="ai-prompt-text">Scan this result image and extract Course Code, Units, and Grade. Output ONLY as JSON: [{"code": "MAT101", "unit": 3, "grade": 5}]. Use 5-point scale (A=5, F=0).</code>
+                <button onclick="copyPrompt()" class="btn-copy">Copy</button>
+            </div>
+        </div>
+
+        <h4>Step 2: Paste JSON Result</h4>
+        <textarea id="json-paste-area" placeholder="Paste the JSON list here..."></textarea>
+        <button class="btn-process" onclick="processBulkJSON()">Inject Courses</button>
+    </div>
+</div>
         </section>
 
        <section id="view-target" class="view">
@@ -235,17 +268,6 @@
     <div id="target-result" class="stats-card" style="display:none; border: 1px solid #fbbf24;"></div>
 </section>
 
-    </div>
-
-    <div id="ad-container-bottom" class="ad-house">
-        <div id="offline-promo" class="fallback-banner">
-            <div class="promo-text">
-                <strong>Exam Venture</strong>
-                <span>Get 1,500+ past questions for JAMB & WAEC!</span>
-            </div>
-            <button class="btn-ad" onclick="window.location.href='https://examventure.com'">Open</button>
-        </div>
-        <div id="ad-slot"></div>
     </div>
 
     <script src="exam_venture_cgpa_calc_5.0.js"></script>
