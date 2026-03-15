@@ -21,18 +21,16 @@ body {
 /* 2. TOP BAR & CONSTANT NAVIGATION */
 .top-bar {
     position: fixed;
-    top: 0;
+    top: 60px;        /* Pushed down by the height of the ad house */
     left: 0;
     width: 100%;
     height: 70px;
-    background: rgba(11, 14, 20, 0.8); /* Match your --bg with transparency */
-    backdrop-filter: blur(12px); /* This creates the 'Elite' frosted glass effect */
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(11, 14, 20, 0.8);
+    backdrop-filter: blur(12px);
     z-index: 1400;
     display: flex;
     align-items: center;
     padding: 0 20px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05); /* Very subtle line */
 }
 
 .app-logo-text {
@@ -73,13 +71,12 @@ body {
     max-width: 500px;     /* Only limits size on large tablets/desktops */
     margin: 0 auto;
     padding: 30px;
-    padding-top: 100px;   /* Pushes content below your top bar */
-    padding-bottom: 110px; /* Leaves space for the ad bar */
     padding-left: 24px; 
     padding-right: 24px;
-    padding-top: 100px;
-    padding-bottom: 120px;
+    padding-top: 140px;   /* 60px (Ad) + 70px (Nav) + 10px spacing */
+    padding-bottom: 30px; /* Reduced since ad is no longer at bottom */
 }
+
 
 /* 4. SIDEBAR & OVERLAY */
 .sidebar {
@@ -192,16 +189,16 @@ body {
 /* 8. AD HOUSE (Bottom Sticky) */
 .ad-house {
     position: fixed;
-    bottom: 0;
+    top: 0;           /* Changed from bottom: 0 */
     left: 0;
     width: 100%;
     min-height: 60px;
     background: #000;
-    z-index: 1000;
+    z-index: 1500;    /* Higher than top-bar (1400) */
     display: flex;
     justify-content: center;
     align-items: center;
-    border-top: 1px solid #1e293b;
+    border-bottom: 1px solid #1e293b; /* Border now on bottom */
 }
 
 /* Animations */
@@ -527,5 +524,137 @@ body:has(#view-login.active) .top-bar {
     display: none !important;
 }
 
+/* Smooth transition for the ad movement */
+#ad-container-bottom {
+    transition: bottom 0.3s ease-in-out, top 0.3s ease-in-out;
+}
 
+/* Class to be applied via JS when keyboard is active */
+.ad-dock-top {
+    bottom: auto !important;
+    top: 75px !important; /* Just below your 70px top-bar */
+}
 
+/* ELITE BULK IMPORT STYLING */
+.bulk-import-section {
+    margin: 20px 0;
+    width: 100%;
+}
+
+.btn-bulk-toggle {
+    width: 100%;
+    padding: 14px;
+    background: rgba(251, 191, 36, 0.05);
+    border: 1px dashed var(--accent);
+    color: var(--accent);
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-bulk-toggle:hover {
+    background: rgba(251, 191, 36, 0.1);
+    transform: translateY(-2px);
+}
+
+.bulk-drawer {
+    background: #161b22;
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    padding: 20px;
+    margin-top: 15px;
+    animation: slideDown 0.3s ease-out;
+}
+
+.ai-instruction-card {
+    background: #0d1117;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.ai-instruction-card h4 {
+    font-size: 0.8rem;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.code-copy-box {
+    background: #000;
+    padding: 10px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid #30363d;
+}
+
+.code-copy-box code {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.7rem;
+    color: #8b949e;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.btn-copy {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.65rem;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+#json-paste-area {
+    width: 100%;
+    height: 120px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    color: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    font-family: monospace;
+    font-size: 0.8rem;
+    resize: none;
+    margin-bottom: 15px;
+}
+
+#json-paste-area:focus {
+    border-color: var(--accent);
+    outline: none;
+}
+
+.btn-process {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: #000;
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+@keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.btn-copy {
+    background: var(--accent);
+    color: #000;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.3s ease; /* Smooth color change to green */
+    min-width: 60px;
+}
