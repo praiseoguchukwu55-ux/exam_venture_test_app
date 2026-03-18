@@ -38,6 +38,9 @@ function switchView(viewId) {
     if (viewId === 'view-target') {
         updateRemainingUnitsDisplay();
         }
+        if (AdEngine.isAdVisible) {
+        AdEngine.pushAd();
+    }
 }
 /**
  * SEMESTER & COURSE ROW LOGIC (4.0 Scale Version)
@@ -116,12 +119,13 @@ function loadSemesterData(semesterKey) {
     }
 }
 
+// REPLACE your old saveSemester() with this:
 function saveSemesterData() {
     const selectedSem = document.getElementById('sem-select').value;
     const rows = document.querySelectorAll('.course-row');
     const semesterData = [];
 
-    // 1. Collect data using the exact classes from your HTML/JS
+    // Correctly loops through your modern div layout
     rows.forEach(row => {
         const code = row.querySelector('.inp-code').value;
         const unit = row.querySelector('.inp-unit').value;
@@ -136,25 +140,20 @@ function saveSemesterData() {
         }
     });
 
-    // Validation
     if (semesterData.length === 0) {
         alert("Please add at least one course before saving.");
         return;
     }
 
-    // 2. Commit to LocalStorage
+    // Unifies the storage key to strictly 'data4-'
     localStorage.setItem(`data4-${selectedSem}`, JSON.stringify(semesterData));
-
-    // 3. Update all Dashboard numbers (CGPA, Class, Units)
-    updateDashboard(); 
     
-    // 4. Update Remaining Units for the Target Tracker
+    updateDashboard(); 
     getRemainingUnits(); 
-
-    // 5. THE REDIRECT: Jump to the Homepage (Dashboard)
     switchView('view-dashboard');
-
-    console.log(`Successfully saved and redirected for ${selectedSem}`);
+    
+    alert("Semester saved successfully to 4.0 database!");
+    triggerAdRefresh();
 }
 
 /**
@@ -244,14 +243,18 @@ function calculateTarget() {
         return;
     }
 
+    // --- STEP 1: DEEP AUDIT OF THE JOURNEY (Strictly 4.0 Isolation) ---
+    // Fetch profile from 4.0 specific key
+    const savedProfile = JSON.parse(localStorage.getItem('student-profile-4') || '{}');
+    
     let currentPoints = 0;
     let currentUnits = 0;
     let asCount = 0;
     let bsCount = 0;
 
-    // --- STEP 1: DEEP AUDIT OF THE JOURNEY (Strictly data4-) ---
+    // Filter only for 4.0 data keys
     Object.keys(localStorage).filter(k => k.startsWith("data4-")).sort().forEach(key => {
-        const semesterData = JSON.parse(localStorage.getItem(key));
+        const semesterData = JSON.parse(localStorage.getItem(key) || '[]');
         
         semesterData.forEach(c => {
             const u = parseFloat(c.unit || c.units || 0);
@@ -283,7 +286,6 @@ function calculateTarget() {
     
     // --- STEP 3: CONVERSATIONAL ENGINE & UI ---
     
-    // Dynamic Greeting for 4.0 scale
     let greeting = "Hello Champ! 👋";
     if (currentCGPA >= 3.5) greeting = "First Class Scholar in the building! 🚀";
     else if (currentCGPA >= 3.0) greeting = "Solid work so far! Let's push higher. 🙌";
@@ -294,13 +296,12 @@ function calculateTarget() {
                 With <b>${asCount} As</b> and <b>${bsCount} Bs</b> secured, here is your strategic roadmap to a <b>${goal} CGPA</b>.
              </p>`;
 
-    // Difficulty & Status Card Logic (Adjusted for 4.0)
+    // Difficulty & Status Card Logic (4.0 Scale)
     let statusTheme = { label: "MODERATE", color: "#34d399", msg: "Very achievable with a structured study plan." };
     if (requiredGPA > 4.0) statusTheme = { label: "IMPOSSIBLE", color: "#ff4444", msg: "Mathematically, this specific target is out of reach." };
     else if (requiredGPA > 3.7) statusTheme = { label: "ELITE MODE", color: "#fbbf24", msg: "Zero margin for error. Maximum focus required." };
     else if (requiredGPA > 3.0) statusTheme = { label: "HARD MODE", color: "#60a5fa", msg: "Consistent high performance is mandatory." };
 
-    // The Current Standing Visual
     html += `
         <div style="background:rgba(255,255,255,0.05); padding:15px; border-radius:12px; margin:20px 0; border:1px solid rgba(255,255,255,0.1); position:relative; overflow:hidden;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
@@ -316,32 +317,24 @@ function calculateTarget() {
 
     // --- STEP 4: THE STRATEGY SPLIT (Impossible vs. Possible) ---
     if (requiredGPA > 4.0) {
-        // The Reality Check Warning (4.0 Max)
         html += `
             <div style="background:rgba(255,68,68,0.05); padding:15px; border-radius:10px; border-left:4px solid #ff4444; margin-bottom: 15px;">
                 <p style="font-weight:bold; color:#ff4444; margin-bottom:8px; font-size: 0.9rem;">System Reality Check</p>
                 <p style="font-size:0.8rem; line-height:1.5; color:#e6edf3;">
-                    To reach a ${goal}, you'd need to average a <b>${requiredGPA} GPA</b> across your remaining units. Since the maximum GPA is 4.0, this exact target isn't mathematically possible anymore.
+                    To reach a ${goal}, you'd need to average a <b>${requiredGPA} GPA</b>. Since the max is 4.0, this target is not possible.
                 </p>
             </div>
             
             <div style="background:#1c2128; padding:15px; border-radius:10px; border:1px solid var(--accent);">
                 <p style="font-size:0.8rem; font-weight:bold; color:var(--accent); margin-bottom:5px;">Your New Max Potential</p>
                 <p style="font-size:0.85rem; line-height:1.4;">
-                    If you secure a perfect 4.0 in every single remaining course, you will graduate with a <b>${maxPossibleCGPA} CGPA</b>. Should we set that as the new target?
+                    If you secure a perfect 4.0 in every remaining course, you will graduate with a <b>${maxPossibleCGPA} CGPA</b>.
                 </p>
             </div>`;
     } else {
-        // The Grade Mix Optimizer (Actionable Strategy for 4.0 Scale)
-        // Logic: 4A + 3B = pointsToEarn
-        // A + B = remainingUnits
-        // Therefore: A = pointsToEarn - 3*remainingUnits
+        // Grade Mix Optimizer for 4.0 Scale
         let minUnitsA = Math.ceil(pointsToEarn - (3 * remainingUnits));
-        
-        // Handle cases where the required GPA is low enough that they don't *need* As
         if (minUnitsA < 0) minUnitsA = 0; 
-        
-        // If the formula requires more As than total remaining units, they need 100% As
         if (minUnitsA > remainingUnits) minUnitsA = remainingUnits;
 
         let maxUnitsB = Math.floor(remainingUnits - minUnitsA);
@@ -349,20 +342,16 @@ function calculateTarget() {
         html += `
             <h3 style="font-size:1rem; margin-bottom:12px; color:var(--accent); border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px;">The Strategy 🎮</h3>
             <p style="font-size:0.85rem; margin-bottom:15px;">
-                To graduate with your target, you must maintain an average of <b>${requiredGPA} GPA</b> across your remaining <b>${remainingUnits} units</b>.
+                You must maintain an average of <b>${requiredGPA} GPA</b> across your remaining <b>${remainingUnits} units</b>.
             </p>
 
             <div style="background:#161b22; padding:15px; border-radius:12px; border:1px solid #30363d; margin-bottom:20px;">
-                <p style="font-size:0.8rem; font-weight:bold; margin-bottom:15px; color:#e6edf3;">
-                    🎯 The Required Grade Mix
-                </p>
-                
+                <p style="font-size:0.8rem; font-weight:bold; margin-bottom:15px; color:#e6edf3;">🎯 Required Grade Mix</p>
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
                     <div style="background:rgba(52, 211, 153, 0.05); padding:12px; border-radius:8px; border:1px solid rgba(52, 211, 153, 0.3);">
                         <small style="color:#34d399; display:block; margin-bottom:4px; font-weight:600;">Minimum 'A' Units</small>
                         <b style="font-size:1.3rem; color:#fff;">${minUnitsA}</b>
                     </div>
-                    
                     <div style="background:rgba(255, 255, 255, 0.02); padding:12px; border-radius:8px; border:1px solid #30363d;">
                         <small style="color:var(--text-dim); display:block; margin-bottom:4px; font-weight:600;">Maximum 'B' Units</small>
                         <b style="font-size:1.3rem; color:#fff;">${maxUnitsB}</b>
@@ -372,62 +361,57 @@ function calculateTarget() {
 
             <div style="background:rgba(96, 165, 250, 0.05); padding:12px; border-radius:8px; border-left:3px solid #60a5fa;">
                 <p style="font-size:0.75rem; color:#e6edf3; line-height:1.4; margin:0;">
-                    <b>💡 Academic Consultant Tip:</b> Focus your "A" effort on 3-unit and 4-unit courses. Dropping to a 'B' or 'C' in a high-unit core course will severely damage this roadmap!
+                    <b>💡 Tip:</b> Focus on 3-unit and 4-unit courses. Dropping below a 'B' in a high-unit course will damage this roadmap!
                 </p>
             </div>
         `;
     }
 
-    // --- STEP 5: INTERACTIVE "WHAT IF" FOOTER ---
     html += `
         <div style="margin-top:25px; border-top:1px solid #30363d; padding-top:15px; text-align:center;">
-            <p style="font-size:0.75rem; color:var(--text-dim); margin-bottom:12px;">Let's explore other possibilities.</p>
             <button onclick="document.getElementById('goal-input').focus();" 
-                    style="background:transparent; border:1px solid var(--accent); color:var(--accent); padding:8px 20px; border-radius:8px; font-size:0.8rem; font-weight:600; cursor:pointer; transition:0.2s;">
+                    style="background:transparent; border:1px solid var(--accent); color:var(--accent); padding:8px 20px; border-radius:8px; font-size:0.8rem; font-weight:600; cursor:pointer;">
                 Adjust Target CGPA
             </button>
         </div>
     `;
 
     resultDiv.innerHTML = html;
+    triggerAdRefresh();
 }
 function exportToPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
 
-    // 1. Fetch Profile Data (Move this here!)
-    const profile = JSON.parse(localStorage.getItem('student-profile') || '{}');
+    const profile = JSON.parse(localStorage.getItem('student-profile-4') || '{}');
 
-    // UI/EEE Theme Colors
+    // UI/EEE Theme Colors (Navy & Gold)
     const NAVY = [11, 14, 20];
     const GOLD = [251, 191, 36];
 
     const getLetterGrade = (val) => {
-        const mapping = { "5": "A", "4": "B", "3": "C", "2": "D", "1": "E", "0": "F" };
-        return mapping[val] || "N/A";
+        const mapping = { "4": "A", "3": "B", "2": "C", "1": "D", "0": "F" };
+        return mapping[val.toString()] || "F";
     };
 
-    // Header Branding
     doc.setFillColor(NAVY[0], NAVY[1], NAVY[2]);
     doc.rect(0, 0, 210, 40, 'F');
     doc.setFont("helvetica", "bold");
     doc.setTextColor(GOLD[0], GOLD[1], GOLD[2]);
     doc.setFontSize(22);
-    doc.text("EXAM VENTURE", 20, 22);
+    doc.text("EXAM VENTURE (4.0)", 20, 22);
     
-    // 2. Add Student Info to Header (Now doc is defined)
     doc.setFontSize(10);
     doc.setTextColor(255, 255, 255);
     doc.text("OFFICIAL ACADEMIC PERFORMANCE REPORT", 20, 30);
-    doc.text(`Student: ${profile.name || '---'}`, 140, 20);
-    doc.text(`Dept: ${profile.dept || '---'}`, 140, 28);
+    doc.text(`Student: ${profile.name || '---'}`, 130, 20);
+    doc.text(`Dept: ${profile.dept || '---'}`, 130, 28);
 
-    // Summary Stats
     let cgpa = document.getElementById('display-cgpa').innerText;
     let units = document.getElementById('display-units').innerText;
     doc.setTextColor(0, 0, 0);
     doc.setFontSize(11);
-    doc.text(`Cumulative CGPA: ${cgpa}`, 20, 50);
+    doc.text(`Cumulative CGPA (4.0): ${cgpa}`, 20, 50);
     doc.text(`Total Units Earned: ${units}`, 120, 50);
 
     let y = 65;
@@ -445,50 +429,52 @@ function exportToPDF() {
         return posY + 8;
     };
 
-    Object.keys(localStorage).filter(k => k.startsWith("data-")).sort().reverse().forEach(key => {
-        if (y > 240) { doc.addPage(); y = 30; }
-        const semTitle = key.replace('data-', '').replace('-', ' Level - ');
-        y = drawTableHeader(y, semTitle);
-        const semesterData = JSON.parse(localStorage.getItem(key));
-        semesterData.forEach((c, index) => {
-            if (index % 2 === 0) {
-                doc.setFillColor(250, 250, 250);
-                doc.rect(20, y, 170, 7, 'F');
-            }
-            doc.text(c.code.toUpperCase(), 25, y + 5);
-            doc.text(c.unit.toString(), 105, y + 5);
-            doc.text(getLetterGrade(c.grade), 165, y + 5);
-            y += 7;
+    // FIXED: Changed "data-4-" to "data4-" to match your save logic perfectly
+    Object.keys(localStorage)
+        .filter(k => k.startsWith("data4-")) 
+        .sort().forEach(key => {
+            if (y > 240) { doc.addPage(); y = 30; }
+            
+            // FIXED: Changed "data-4-" to "data4-" here as well
+            const semTitle = key.replace('data4-', '').replace('-', ' Level - ');
+            y = drawTableHeader(y, semTitle);
+            
+            const semesterData = JSON.parse(localStorage.getItem(key)) || [];
+            
+            doc.setFont("helvetica", "normal");
+            semesterData.forEach((c, index) => {
+                if (index % 2 === 0) {
+                    doc.setFillColor(250, 250, 250);
+                    doc.rect(20, y, 170, 7, 'F');
+                }
+                doc.text(c.code.toUpperCase(), 25, y + 5);
+                doc.text(c.unit.toString(), 105, y + 5);
+                doc.text(getLetterGrade(c.grade), 165, y + 5);
+                y += 7;
+            });
+            y += 15;
         });
-        y += 15;
-    });
 
-const pageHeight = doc.internal.pageSize.height;
+    const pageHeight = doc.internal.pageSize.height;
     
-    // 1. Decorative line at the bottom
     doc.setDrawColor(230, 230, 230);
     doc.line(20, pageHeight - 30, 190, pageHeight - 30);
 
-    // 2. The Verification Box (Bottom Left)
-    // x = 20 (Left margin), y = pageHeight - 25
     doc.setFillColor(NAVY[0], NAVY[1], NAVY[2]);
     doc.rect(20, pageHeight - 25, 45, 15, 'F'); 
     
     doc.setTextColor(GOLD[0], GOLD[1], GOLD[2]);
     doc.setFontSize(7);
-    doc.setFont("helvetica", "bold");
     doc.text("VERIFIED BY", 25, pageHeight - 19);
     doc.setFontSize(9);
     doc.text("EXAM VENTURE", 25, pageHeight - 14);
 
-    // 3. Timestamp (Right aligned to the seal)
     doc.setFontSize(7);
     doc.setTextColor(150, 150, 150);
-    doc.setFont("helvetica", "italic");
     const date = new Date().toLocaleDateString();
-    doc.text(`Authentic Digital Record: ${date}`, 70, pageHeight - 14);
+    doc.text(`Authentic 4.0 Scale Record: ${date}`, 70, pageHeight - 14);
 
-    doc.save(`Transcript_${profile.name || 'Student'}.pdf`);
+    doc.save(`Transcript_4.0_${profile.name || 'Student'}.pdf`);
 }
 function clearAllData() {
     if (confirm("⚠️ DANGER: Delete ALL 4.0 records? (Your 5.0 Engineering data will be safe)")) {
@@ -512,34 +498,59 @@ function clearAllData() {
 // 1. SAVE PROFILE DATA
 // 1. SAVE PROFILE DATA
 // 1. SAVE PROFILE DATA
+// Replace your existing saveProfile function with this:
 function saveProfile() {
-    // Capture ALL data, including the total units
+    // 1. Capture ALL data from the setup/profile fields
+    // Ensure these IDs (setup-name, setup-uni, etc.) match your 4.0 HTML exactly
     const profileData = {
-        name: document.getElementById('setup-name').value,
-        uni: document.getElementById('setup-uni').value,
-        faculty: document.getElementById('setup-faculty').value,
-        dept: document.getElementById('setup-dept').value,
-        level: document.getElementById('setup-level').value,
-        totalUnits: document.getElementById('prof-total-units').value // <-- FIXED: Now it saves this!
+        name: document.getElementById('setup-name')?.value || "Scholar",
+        uni: document.getElementById('setup-uni')?.value || "",
+        faculty: document.getElementById('setup-faculty')?.value || "",
+        dept: document.getElementById('setup-dept')?.value || "",
+        level: document.getElementById('setup-level')?.value || "",
+        // CRITICAL: Capturing the units for the 4.0 scale
+        totalUnits: document.getElementById('prof-total-units').value 
     };
 
-    // Save to permanent browser storage
-    localStorage.setItem('student-profile', JSON.stringify(profileData));
+    if (!profileData.totalUnits) {
+        alert("Please enter your Total Degree Units to enable the Target Tracker! 😊");
+        return;
+    }
+
+    // 2. Save to 4.0 isolated storage
+    // We use 'student-profile-4' so it never resets or conflicts with the 5.0 app
+    localStorage.setItem('student-profile-4', JSON.stringify(profileData));
     
-    // Update the UI immediately everywhere
-    applyProfile(); 
+    // 3. Update the UI and Dashboard Math
+    // We call these now so the homepage reflects changes without a manual refresh
+    if (typeof applyProfile === "function") applyProfile(); 
     
-    // Force the subtraction math to run instantly
+    // This updates the "Units Remaining" and "Current CGPA" on the dashboard
+    updateDashboard(); 
     updateRemainingUnitsDisplay(); 
     
-    alert("Profile & Target Tracker Updated Successfully!");
+    // 4. Feedback and Redirect
+    alert("4.0 Profile & Target Tracker Updated Successfully! 🚀");
+    
+    // Switch to the homepage (Dashboard)
     switchView('view-dashboard');
+}
+// Update your loadProfile function to look for the new key:
+function loadProfile() {
+    const saved = localStorage.getItem('student-profile-4');
+    if (saved) {
+        const profile = JSON.parse(saved);
+        document.getElementById('prof-name').value = profile.name || "";
+        document.getElementById('prof-dept').value = profile.dept || "";
+        document.getElementById('prof-level').value = profile.level || "";
+        document.getElementById('prof-total-units').value = profile.totalUnits || "";
+    }
 }
 
 // 2. APPLY PROFILE DATA TO UI (The "Everywhere" logic)
 // 2. APPLY PROFILE DATA TO UI (The "Everywhere" logic)
 function applyProfile() {
-    const savedProfile = localStorage.getItem('student-profile');
+    const savedProfile = localStorage.getItem('student-profile-4');
     if (!savedProfile) return;
 
     const data = JSON.parse(savedProfile);
@@ -568,15 +579,21 @@ function applyProfile() {
     if(document.getElementById('prof-total-units')) document.getElementById('prof-total-units').value = data.totalUnits || '';
 }
 
+// --- UPDATED RENDER FUNCTION ---
 function renderAcademicHistory() {
     const listContainer = document.getElementById('dynamic-sem-list');
     if (!listContainer) return;
     listContainer.innerHTML = '';
 
-    // CHANGE: Filter for data4-
+    // Strictly filter for the unified "data4-" key
     const keys = Object.keys(localStorage)
-        .filter(k => k.startsWith("data4-"))
+        .filter(k => k.startsWith("data4-")) 
         .sort().reverse();
+
+    if (keys.length === 0) {
+        listContainer.innerHTML = `<p style="text-align:center; padding:20px; color:var(--text-dim);">No 4.0 data found.</p>`;
+        return;
+    }
 
     keys.forEach(key => {
         const semesterData = JSON.parse(localStorage.getItem(key));
@@ -585,43 +602,48 @@ function renderAcademicHistory() {
         semesterData.forEach(c => {
             const u = parseInt(c.unit) || 0;
             sUnits += u;
-            sPoints += (u * (parseInt(c.grade) || 0));
+            const gradeVal = Math.min(parseInt(c.grade) || 0, 4); // Force 4.0 max
+            sPoints += (u * gradeVal);
         });
 
         const sGpa = sUnits > 0 ? (sPoints / sUnits).toFixed(2) : "0.00";
-        // CHANGE: Remove data4- from the title
+        
+        // Correctly cleans 'data4-' out of the title
         const title = key.replace('data4-', '').replace('-', ' Level - ');
 
         const card = document.createElement('div');
-        card.className = 'stats-card';
+        card.className = 'stats-card clickable-history'; 
+        
+        
+        // Makes the card click to edit
+        card.onclick = () => switchView('view-calc');
+        card.style.cursor = 'pointer';
+        card.style.padding = '18px 20px';
+        card.style.marginBottom = '12px';
         card.style.textAlign = 'left';
-        card.style.padding = '15px 20px';
-        card.style.marginBottom = '10px';
-        
-        // CHANGE: GPA >= 3.5 is the new green threshold for 4.0 scale
-        const isHighGPA = sGpa >= 3.5; 
-        
+
+        // Re-adding the Edit Pen and Trash Bin to the UI
         card.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <strong style="font-size: 0.9rem;">${title}</strong>
-                    <p style="font-size: 0.75rem; color: var(--text-dim)">${sUnits} Total Units</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="flex: 1; min-width: 0;">
+                    <strong style="color: var(--accent); display: block; margin-bottom: 2px;">${title}</strong>
+                    <p style="font-size: 0.75rem; color: var(--text-dim)">${sUnits} Units</p>
                 </div>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span class="badge" style="background: ${isHighGPA ? 'rgba(76, 175, 80, 0.1)' : 'rgba(251, 191, 36, 0.1)'}; 
-                                               color: ${isHighGPA ? '#4caf50' : 'var(--accent)'};">
+                <div style="display: flex; align-items: center; gap: 20px;">
+                    <span style="color: var(--accent); font-size: 0.9rem; opacity: 0.7;">✎</span>
+                    <span class="badge" style="background: ${sGpa >= 3.5 ? 'rgba(76, 175, 80, 0.1)' : 'rgba(251, 191, 36, 0.1)'}; 
+                                               color: ${sGpa >= 3.5 ? '#4caf50' : 'var(--accent)'}; font-weight: bold;">
                         ${sGpa} GPA
                     </span>
-                    <button onclick="deleteSemester('${key}')" style="background:none; border:none; cursor:pointer; color:#ff4444; font-size: 1.1rem; padding: 0;">
+                    <button onclick="event.stopPropagation(); deleteSemester('${key}')" 
+                            style="background:none; border:none; cursor:pointer; color:#ff4444; font-size: 1.2rem; padding: 5px; transition: transform 0.2s;">
                         🗑️
                     </button>
                 </div>
-            </div>
-        `;
+            </div>`;
         listContainer.appendChild(card);
     });
 }
-
 function deleteSemester(key) {
     // CHANGE: Use data4- for name cleaning
     const title = key.replace('data4-', '').replace('-', ' Level - ');
@@ -688,30 +710,23 @@ function handleReset() {
 }
 
 function updateRemainingUnitsDisplay() {
-    // Fetch profile and target input box
-    const savedProfile = JSON.parse(localStorage.getItem('student-profile'));
-    const remainingInput = document.getElementById('remaining-units');
-    
-    // Stop if profile or total units aren't set yet
-    if (!savedProfile || !savedProfile.totalUnits || !remainingInput) return;
+    const remainingUnitsElement = document.getElementById('remaining-units');
+    if (!remainingUnitsElement) return;
 
-    const totalRequired = parseFloat(savedProfile.totalUnits) || 0;
-    let completedUnits = 0;
+    // FIX: Must use 'student-profile-4'
+    const savedProfile = JSON.parse(localStorage.getItem('student-profile-4') || '{}');
+    const totalUnitsToGraduate = parseInt(savedProfile.totalUnits) || 120; 
 
-    // Deep scan of the 4.0 data to find completed units
+    let earnedUnits = 0;
     Object.keys(localStorage).filter(k => k.startsWith("data4-")).forEach(key => {
-        const semester = JSON.parse(localStorage.getItem(key));
-        semester.forEach(course => {
-            // FIXED: Checking both 'unit' and 'units' to ensure math doesn't fail
-            completedUnits += parseFloat(course.unit || course.units || 0);
+        const semesterData = JSON.parse(localStorage.getItem(key) || '[]');
+        semesterData.forEach(course => {
+            earnedUnits += (parseInt(course.unit) || 0);
         });
     });
 
-    // The Subtraction
-    const remaining = totalRequired - completedUnits;
-    
-    // Auto-fill the Target Tracker input box
-    remainingInput.value = remaining > 0 ? remaining : 0;
+    const remaining = totalUnitsToGraduate - earnedUnits;
+    remainingUnitsElement.value = remaining > 0 ? remaining : 0;
 }
 
 function toggleBulkInput() {
@@ -781,9 +796,132 @@ function processBulkJSON() {
         alert("Please paste a valid JSON list from the AI (starting with [ and ending with ]).");
     }
 }
+
+/**
+ * ADMOB & REFRESH CONFIGURATION
+ */
+const ADMOB_ID = 'ca-app-pub-3940256099942544/6300978111'; // TEST ID - Replace later
+let adRefreshCount = 0;
+const MAX_REFRESHES = 15;
+
+async function triggerAdRefresh() {
+    if (adRefreshCount < MAX_REFRESHES && navigator.onLine) {
+        try {
+            // Using Capacitor AdMob Plugin syntax
+            await window.Capacitor.Plugins.AdMob.showBanner({
+                adId: ADMOB_ID,
+                position: "TOP_CENTER",
+                margin: 0
+            });
+            adRefreshCount++;
+            console.log(`AdMob Refreshed: ${adRefreshCount}/15`);
+        } catch (e) {
+            console.log("AdMob not initialized yet or not running in APK");
+        }
+    }
+}
+
+// 1-Minute Timed Refresh
+setInterval(() => {
+    triggerAdRefresh();
+}, 60000);
+
+function showWaitScreen(msg) {
+    const loginView = document.getElementById('view-login');
+    if (loginView) {
+        loginView.innerHTML = `
+            <div class="stats-card" style="text-align:center; border: 1px solid var(--accent); margin: 20px;">
+                <h3 style="color:var(--accent)">Exam Venture</h3>
+                <p style="margin: 15px 0; font-size: 0.9rem;">${msg}</p>
+                <div style="width:30px; height:30px; border:3px solid #30363d; border-top:3px solid var(--accent); border-radius:50%; animation: spin 1s linear infinite; margin: 10px auto;"></div>
+            </div>`;
+    }
+}
+
+window.addEventListener('DOMContentLoaded', async () => {
+    if (!checkAppActivation()) return;
+
+    // Initialize AdMob if in APK
+    if (window.Capacitor) {
+        try {
+            await window.Capacitor.Plugins.AdMob.initialize();
+            triggerAdRefresh();
+        } catch (e) { console.log("AdMob init failed"); }
+    }
+    
+    enforceInternetPolicy();
+});
+
+/**
+ * 5-HOUR INTERNET LEASE (4.0 VERSION)
+ */
+function enforceInternetPolicy() {
+    const LEASE_DURATION = 5 * 60 * 60 * 1000;
+    const STORAGE_KEY = 'ev-lease-expiry-4'; // Specific to 4.0
+    const pill = document.getElementById('sync-pill');
+    const pillTimer = document.getElementById('pill-timer');
+
+    const updateLease = () => {
+        localStorage.setItem(STORAGE_KEY, (Date.now() + LEASE_DURATION).toString());
+        if (pill) pill.classList.remove('active'); // Hide immediately when online
+        
+        const lock = document.getElementById('internet-lock-screen');
+        if (lock) lock.remove();
+    };
+
+    setInterval(() => {
+        const expiry = parseInt(localStorage.getItem(STORAGE_KEY) || "0");
+        const now = Date.now();
+        const timeLeft = expiry - now;
+
+        if (navigator.onLine) {
+            updateLease();
+        } else {
+            if (pill) pill.classList.add('active'); // Show pill if offline
+            
+            if (timeLeft <= 0) {
+                showLockScreen();
+            } else if (pillTimer) {
+                const h = Math.floor(timeLeft / 3600000);
+                const m = Math.floor((timeLeft % 3600000) / 60000);
+                const s = Math.floor((timeLeft % 60000) / 1000);
+                pillTimer.innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            }
+        }
+    }, 1000);
+
+    if (navigator.onLine) updateLease();
+
+    function showLockScreen() {
+        if (document.getElementById('internet-lock-screen')) return;
+        const lock = document.createElement('div');
+        lock.id = 'internet-lock-screen';
+        lock.innerHTML = `
+            <div style="background: #0d1117; padding: 30px; border-radius: 12px; border: 1px solid #fbbf24; text-align: center; width: 300px;">
+                <h2 style="color: #fbbf24;">4.0 Session Expired</h2>
+                <p style="color: #c9d1d9; margin: 15px 0; font-size: 0.85rem;">For security, please connect to the internet to resume your 4.0 session.</p>
+                <div style="font-size: 0.7rem; color: #8b949e; border-top: 1px solid #30363d; padding-top: 10px;">EXAM VENTURE CLOUD SYNC</div>
+            </div>`;
+        Object.assign(lock.style, {
+            position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+            background: 'rgba(1, 4, 9, 0.98)', display: 'flex', alignItems: 'center', 
+            justifyContent: 'center', zIndex: '20000'
+        });
+        document.body.appendChild(lock);
+    }
+}
+
+// Add to your DOMContentLoaded block at the very bottom of the file:
+// enforceInternetPolicy();
+
+/**
+ * AI PROMPT GENERATOR
+ * Merged for 4.0 Scale results
+ */
 // 3. Ensure Top Bar stays hidden on load (4.0 Version)
+// UNIFIED INITIALIZATION (UI, PIN, and Profile Loading)
 window.addEventListener('DOMContentLoaded', () => {
-    // Hide UI elements if the login screen is the active view
+    // 1. Hide UI elements if the login screen is active
     const loginView = document.getElementById('view-login');
     if (loginView && loginView.classList.contains('active')) {
         const topBar = document.querySelector('.top-bar');
@@ -793,28 +931,89 @@ window.addEventListener('DOMContentLoaded', () => {
         if (adHouse) adHouse.style.display = 'none';
     }
     
-    // Check for 4.0 specific PIN (using app4-pin for isolation)
+    // 2. Setup 4.0 PIN Instruction
     if (localStorage.getItem('app4-pin')) {
         const instruction = document.getElementById('login-instruction');
         if (instruction) {
             instruction.innerText = "Enter your secret 4.0 PIN to continue";
         }
     }
+
+    // 3. Load 4.0 Profile Data into the input field
+    const profileInput = document.getElementById('prof-total-units');
+    if (profileInput) {
+        // MUST use 'student-profile-4' for 4.0 isolation
+        const savedProfile = JSON.parse(localStorage.getItem('student-profile-4') || '{}');
+        if (savedProfile.totalUnits) {
+            profileInput.value = savedProfile.totalUnits;
+        }
+    }
+    
+    // 4. Run initial dashboard math
+    updateDashboard();
+    updateRemainingUnitsDisplay();
 });
 
-// SMART LISTENER: Recalculates remaining units instantly as the user types in the profile
-document.addEventListener('DOMContentLoaded', () => {
-    const totalUnitsProfileInput = document.getElementById('prof-total-units');
-    
-    if (totalUnitsProfileInput) {
-        // Run the subtraction math every time a number is typed or changed
-        totalUnitsProfileInput.addEventListener('input', () => {
-            // We temporarily save the profile object so the math function can catch it instantly
-            const tempProfile = JSON.parse(localStorage.getItem('student-profile') || '{}');
-            tempProfile.totalUnits = totalUnitsProfileInput.value;
-            localStorage.setItem('student-profile', JSON.stringify(tempProfile));
-            
-            updateRemainingUnitsDisplay();
-        });
+/**
+ * EXAM VENTURE AD ENGINE
+ * Only refreshes when the ad is visible to the user.
+ */
+const AdEngine = {
+    timer: null,
+    refreshInterval: 90000, // 1.5 Minutes
+    isAdVisible: false,
+
+    init() {
+        const adWrapper = document.getElementById('dynamic-ad-wrapper');
+        if (!adWrapper) return;
+
+        // 1. Setup the "Eyes": Intersection Observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                this.isAdVisible = entry.isIntersecting;
+                if (this.isAdVisible) {
+                    console.log("Ad visible: Timer Resumed");
+                    this.startTimer();
+                } else {
+                    console.log("Ad hidden: Timer Paused");
+                    this.stopTimer();
+                }
+            });
+        }, { threshold: 0.5 }); // Must be 50% visible to count
+
+        observer.observe(adWrapper);
+
+        // 2. Initial Push
+        this.pushAd();
+    },
+
+    pushAd() {
+        if (window.adsbygoogle && navigator.onLine) {
+            try {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                console.log("Ad Refreshed Successfully");
+            } catch (e) {
+                console.error("AdSense Push Error:", e);
+            }
+        }
+    },
+
+    startTimer() {
+        if (this.timer) return; 
+        this.timer = setInterval(() => {
+            if (this.isAdVisible && !document.hidden) {
+                this.pushAd();
+            }
+        }, this.refreshInterval);
+    },
+
+    stopTimer() {
+        clearInterval(this.timer);
+        this.timer = null;
     }
+};
+
+// Start the engine when the page loads
+window.addEventListener('DOMContentLoaded', () => {
+    AdEngine.init();
 });
