@@ -658,3 +658,86 @@ body:has(#view-login.active) .top-bar {
     transition: background 0.3s ease; /* Smooth color change to green */
     min-width: 60px;
 }
+
+/* Container for the history list */
+#dynamic-sem-list {
+    padding: 10px 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* The Semester Card */
+.clickable-history {
+    background: var(--card);
+    border: 1px solid #30363d;
+    border-radius: 12px;
+    transition: all 0.2s ease-in-out;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Hover Effect: Glow and Slide */
+.clickable-history:hover {
+    background: rgba(251, 191, 36, 0.05) !important;
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* Visual "Edge" highlight on hover */
+.clickable-history::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 4px;
+    background: var(--accent);
+    opacity: 0;
+    transition: opacity 0.2s;
+}
+
+.clickable-history:hover::before {
+    opacity: 1;
+}
+
+/* Trash Bin Hover */
+button[onclick*="deleteSemester"]:hover {
+    transform: scale(1.2);
+    filter: drop-shadow(0 0 5px rgba(255, 68, 68, 0.5));
+}
+#sync-pill {
+    position: fixed;
+    top: 15px;
+    left: 50%;
+    transform: translateX(-50%) translateY(-100px); /* Start hidden above screen */
+    background: rgba(11, 14, 20, 0.95);
+    border: 1px solid #fbbf24;
+    padding: 8px 16px;
+    border-radius: 50px;
+    z-index: 10001; /* Above everything except the lock screen */
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    pointer-events: none; /* User can click through it to the app */
+}
+
+#sync-pill.active {
+    transform: translateX(-50%) translateY(0); /* Slide down into view */
+}
+
+.pill-dot {
+    width: 8px;
+    height: 8px;
+    background: #fbbf24;
+    border-radius: 50%;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.2); }
+    100% { opacity: 1; transform: scale(1); }
+}
