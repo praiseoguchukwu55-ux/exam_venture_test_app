@@ -1,28 +1,57 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Exam Venture | Official CGPA Calculator & Exam Target Setter</title>
+    <meta name="description" content="The ultimate CGPA Calculator for all Nigerian Universities (4.0 & 5.0 scale). Track JAMB, WAEC, NECO, GCE, SAT scores and Post-UTME targets offline.">
+    <meta name="keywords" content="CGPA Calculator, Nigeria University Grading System, 5.0 CGPA Scale, 4.0 CGPA Scale, JAMB Result Checker, WAEC Score Grade, NECO Result Calculator, SAT Nigeria, Post-UTME Target, Calculate GP, Carryover Tracker, 100 Level Exams, Engineering CGPA, Medical Student GP, UNILAG, UI, OAU, UNIBEN, UNN, LASU, BUK">
+
+    <meta property="og:title" content="Exam Venture: Nigeria's #1 Student Academic Tool">
+    <meta property="og:description" content="Calculate your CGPA, set exam targets, and track your academic growth offline. For University, JAMB, and SSCE students.">
+    <meta property="og:image" content="logo4.png">
+    <meta property="og:type" content="website">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Exam Venture",
+      "operatingSystem": "Android, iOS, Windows",
+      "applicationCategory": "EducationApplication",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "1000"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "NGN"
+      }
+    }
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional CGPA Calculator</title>
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="exam_venture_cgpa_calc_5.0.css">
 </head>
 <body>
-   <div id="ad-container-top" class="ad-house">
-        <div id="ad-slot">
-            <div id="ad-slot">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
-    <ins class="adsbygoogle"
-         style="display:inline-block;width:320px;height:50px"
-         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX"
-         data-ad-slot="XXXXXXXXXX"></ins>
-    <script>
-         (adsbygoogle = window.adsbygoogle || []).push({});
-    </script>
+    <div id="sync-pill">
+    <div class="pill-dot"></div>
+    <span style="color: #c9d1d9; font-size: 0.8rem; font-weight: bold;">OFFLINE:</span>
+    <span id="pill-timer" style="color: #fbbf24; font-family: monospace; font-size: 0.9rem; font-weight: bold;">05:00:00</span>
 </div>
-            </div>
+  <div id="ad-container-top" class="ad-house">
+    <div id="ad-slot">
+        <div id="test-ad-banner" style="width:320px; height:50px; background:#333; color:#fbbf24; display:flex; align-items:center; justify-content:center; font-size:12px; border:1px dashed #fbbf24;">
+            [ TEST AD: ca-app-pub-3940256099942544/6300978111 ]
+        </div>
     </div>
-    </div>
+</div>
     <div class="top-bar">
         <button id="open-sidebar" class="constant-menu-btn" onclick="toggleSidebar()">
             <div class="hamburger-icon">
@@ -234,14 +263,51 @@
 
     <div id="bulk-input-area" class="bulk-drawer" style="display: none;">
         <div class="ai-instruction-card">
-            <h4>Step 1: Copy AI Prompt</h4>
+ <h4><b>Step 1: Extract Data with AI (Like Chat GPT or Gemini)</b></h4>
+            <br>
+               <h5><i> - Click the the "Copy" button to copy the specialized AI extraction prompt.
+                - Upload your result image to the AI, paste the prompt, and let it generate the formatted list of your courses, units, and grades.
+               </i>
+            </h5>
             <div class="code-copy-box">
-                <code id="ai-prompt-text">Scan this result image and extract Course Code, Units, and Grade. Output ONLY as JSON: [{"code": "MAT101", "unit": 3, "grade": 5}]. Use 5-point scale (A=5, F=0).</code>
+                <code id="ai-prompt-text">TASK: Extract academic results from the attached image.
+
+FORMATTING RULES:
+
+Output ONLY a valid JSON array inside a SINGLE markdown code block.
+
+ABSOLUTELY NO text before or after the code block.
+
+No conversational filler or explanations.
+
+JSON Structure: [{"code": "STRING", "unit": NUMBER, "grade": NUMBER}]
+
+GRADING LOGIC (5.0 Scale):
+Convert Letter Grades to Numbers immediately:
+
+A = 5
+
+B = 4
+
+C = 3
+
+D = 2
+
+E = 1
+
+F = 0
+
+IMAGE DATA: [Attached Image]</code>
                 <button onclick="copyPrompt()" class="btn-copy">Copy</button>
             </div>
         </div>
 
-        <h4>Step 2: Paste JSON Result</h4>
+        <h4><b>Step 2: Paste JSON Result</b></h4>
+         <br \>
+            <h5><i> - Copy the code-like list (JSON) generated by the AI and paste it into the "Paste JSON Result" field below
+                 - Click "Inject Courses" to instantly populate your calculator with all your subjects.
+                </i>
+                </h5>
         <textarea id="json-paste-area" placeholder="Paste the JSON list here..."></textarea>
         <button class="btn-process" onclick="processBulkJSON()">Inject Courses</button>
     </div>
@@ -271,5 +337,14 @@
     </div>
 
     <script src="exam_venture_cgpa_calc_5.0.js"></script>
+<script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Exam Venture PWA: Active'))
+            .catch(err => console.log('PWA Registration Failed: ', err));
+        });
+      }
+    </script>
 </body>
 </html>
