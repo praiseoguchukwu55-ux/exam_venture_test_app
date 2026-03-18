@@ -38,6 +38,9 @@ function switchView(viewId) {
     // 3. Close sidebar
     const menu = document.getElementById("side-menu");
     if (menu && menu.classList.contains("active")) toggleSidebar();
+    if (AdEngine.isAdVisible) {
+        AdEngine.pushAd();
+    }
 }
 
 /**
@@ -156,6 +159,7 @@ function saveSemesterData() {
     switchView('view-dashboard');
 
     console.log(`Successfully saved and redirected for ${selectedSem}`);
+    triggerAdRefresh();
 }
 
 /**
@@ -389,6 +393,7 @@ function calculateTarget() {
     `;
 
     resultDiv.innerHTML = html;
+    triggerAdRefresh();
 }
 
 function exportToPDF() {
@@ -581,23 +586,43 @@ function renderAcademicHistory() {
         const title = key.replace('data-', '').replace('-', ' Level - ');
 
         const card = document.createElement('div');
-        card.className = 'stats-card';
+        card.className = 'stats-card clickable-history'; 
+        card.onclick = () => switchView('view-calc');
+        
+        // Inline styles for the card layout
         card.style.textAlign = 'left';
-        card.style.padding = '15px 20px';
-        card.style.marginBottom = '10px';
+        card.style.padding = '18px 20px';
+        card.style.marginBottom = '12px';
+        card.style.cursor = 'pointer';
+        card.style.display = 'block';
         
         card.innerHTML = `
-            <div style="display: flex; justify-content: space-between; align-items: center;">
-                <div>
-                    <strong style="font-size: 0.9rem;">${title}</strong>
+            <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                <div style="flex: 1; min-width: 0;">
+                    <strong style="font-size: 0.95rem; display: block; margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                        ${title}
+                    </strong>
                     <p style="font-size: 0.75rem; color: var(--text-dim)">${sUnits} Total Units</p>
                 </div>
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span class="badge" style="background: ${sGpa >= 4.5 ? 'rgba(76, 175, 80, 0.1)' : 'rgba(251, 191, 36, 0.1)'}; 
-                                               color: ${sGpa >= 4.5 ? '#4caf50' : 'var(--accent)'};">
+
+                <div style="display: flex; align-items: center; gap: 20px; margin-left: 15px;">
+                    
+                    <span style="color: var(--accent); font-size: 0.9rem; opacity: 0.7; display: flex; align-items: center;">✎</span>
+
+                    <span class="badge" style="
+                        background: ${sGpa >= 4.5 ? 'rgba(76, 175, 80, 0.1)' : 'rgba(251, 191, 36, 0.1)'}; 
+                        color: ${sGpa >= 4.5 ? '#4caf50' : 'var(--accent)'};
+                        padding: 5px 10px;
+                        border-radius: 6px;
+                        font-weight: bold;
+                        font-size: 0.85rem;
+                        white-space: nowrap;
+                    ">
                         ${sGpa} GPA
                     </span>
-                    <button onclick="deleteSemester('${key}')" style="background:none; border:none; cursor:pointer; color:#ff4444; font-size: 1.1rem; padding: 0;">
+
+                    <button onclick="event.stopPropagation(); deleteSemester('${key}')" 
+                            style="background:none; border:none; cursor:pointer; color:#ff4444; font-size: 1.2rem; padding: 5px; display: flex; align-items: center; transition: transform 0.2s;">
                         🗑️
                     </button>
                 </div>
@@ -767,7 +792,67 @@ function processBulkJSON() {
         alert("Invalid format. Please make sure you copied the entire [...] list from the AI.");
     }
 }
+/**
+ * 5-HOUR INTERNET LEASE (5.0 VERSION)
+ */
+function enforceInternetPolicy() {
+    const LEASE_DURATION = 5 * 60 * 60 * 1000;
+    const STORAGE_KEY = 'ev-lease-expiry-5'; // Specific to 5.0
+    const pill = document.getElementById('sync-pill');
+    const pillTimer = document.getElementById('pill-timer');
 
+    const updateLease = () => {
+        localStorage.setItem(STORAGE_KEY, (Date.now() + LEASE_DURATION).toString());
+        if (pill) pill.classList.remove('active');
+        
+        const lock = document.getElementById('internet-lock-screen');
+        if (lock) lock.remove();
+    };
+
+    setInterval(() => {
+        const expiry = parseInt(localStorage.getItem(STORAGE_KEY) || "0");
+        const now = Date.now();
+        const timeLeft = expiry - now;
+
+        if (navigator.onLine) {
+            updateLease();
+        } else {
+            if (pill) pill.classList.add('active');
+            
+            if (timeLeft <= 0) {
+                showLockScreen();
+            } else if (pillTimer) {
+                const h = Math.floor(timeLeft / 3600000);
+                const m = Math.floor((timeLeft % 3600000) / 60000);
+                const s = Math.floor((timeLeft % 60000) / 1000);
+                pillTimer.innerText = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            }
+        }
+    }, 1000);
+
+    if (navigator.onLine) updateLease();
+
+    function showLockScreen() {
+        if (document.getElementById('internet-lock-screen')) return;
+        const lock = document.createElement('div');
+        lock.id = 'internet-lock-screen';
+        lock.innerHTML = `
+            <div style="background: #0d1117; padding: 30px; border-radius: 12px; border: 1px solid #fbbf24; text-align: center; width: 300px;">
+                <h2 style="color: #fbbf24;">5.0 Session Expired</h2>
+                <p style="color: #c9d1d9; margin: 15px 0; font-size: 0.85rem;">For security, please connect to the internet to resume your 5.0 session.</p>
+                <div style="font-size: 0.7rem; color: #8b949e; border-top: 1px solid #30363d; padding-top: 10px;">EXAM VENTURE CLOUD SYNC</div>
+            </div>`;
+        Object.assign(lock.style, {
+            position: 'fixed', top: 0, left: 0, width: '100%', height: '100%',
+            background: 'rgba(1, 4, 9, 0.98)', display: 'flex', alignItems: 'center', 
+            justifyContent: 'center', zIndex: '20000'
+        });
+        document.body.appendChild(lock);
+    }
+}
+
+// Add to your DOMContentLoaded block at the very bottom of the file:
+// enforceInternetPolicy();
 // 3. Ensure Top Bar stays hidden on load
 // --- MERGED INITIALIZATION & SMART LISTENERS ---
 window.addEventListener('DOMContentLoaded', () => {
@@ -811,4 +896,69 @@ window.addEventListener('DOMContentLoaded', () => {
             updateRemainingUnitsDisplay();
         });
     }
+    enforceInternetPolicy();
+});
+
+/**
+ * EXAM VENTURE AD ENGINE
+ * Only refreshes when the ad is visible to the user.
+ */
+const AdEngine = {
+    timer: null,
+    refreshInterval: 90000, // 1.5 Minutes
+    isAdVisible: false,
+
+    init() {
+        const adWrapper = document.getElementById('dynamic-ad-wrapper');
+        if (!adWrapper) return;
+
+        // 1. Setup the "Eyes": Intersection Observer
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                this.isAdVisible = entry.isIntersecting;
+                if (this.isAdVisible) {
+                    console.log("Ad visible: Timer Resumed");
+                    this.startTimer();
+                } else {
+                    console.log("Ad hidden: Timer Paused");
+                    this.stopTimer();
+                }
+            });
+        }, { threshold: 0.5 }); // Must be 50% visible to count
+
+        observer.observe(adWrapper);
+
+        // 2. Initial Push
+        this.pushAd();
+    },
+
+    pushAd() {
+        if (window.adsbygoogle && navigator.onLine) {
+            try {
+                (adsbygoogle = window.adsbygoogle || []).push({});
+                console.log("Ad Refreshed Successfully");
+            } catch (e) {
+                console.error("AdSense Push Error:", e);
+            }
+        }
+    },
+
+    startTimer() {
+        if (this.timer) return; 
+        this.timer = setInterval(() => {
+            if (this.isAdVisible && !document.hidden) {
+                this.pushAd();
+            }
+        }, this.refreshInterval);
+    },
+
+    stopTimer() {
+        clearInterval(this.timer);
+        this.timer = null;
+    }
+};
+
+// Start the engine when the page loads
+window.addEventListener('DOMContentLoaded', () => {
+    AdEngine.init();
 });
