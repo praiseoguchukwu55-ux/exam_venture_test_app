@@ -40,17 +40,13 @@
     <link rel="stylesheet" href="exam_venture_cgpa_calc_5.0.css">
 </head>
 <body>
-    <div id="sync-pill">
-    <div class="pill-dot"></div>
-    <span style="color: #c9d1d9; font-size: 0.8rem; font-weight: bold;">OFFLINE:</span>
-    <span id="pill-timer" style="color: #fbbf24; font-family: monospace; font-size: 0.9rem; font-weight: bold;">05:00:00</span>
-</div>
-  <div id="ad-container-top" class="ad-house">
-    <div id="ad-slot">
-        <div id="test-ad-banner" style="width:320px; height:50px; background:#333; color:#fbbf24; display:flex; align-items:center; justify-content:center; font-size:12px; border:1px dashed #fbbf24;">
-            [ TEST AD: ca-app-pub-3940256099942544/6300978111 ]
-        </div>
-    </div>
+
+  <div id="ad-house" style="background: #020617; display: flex; align-items: center; justify-content: center; overflow: hidden; height: 60px;">
+    <ins class="adsbygoogle"
+         style="display:block; width:320px; height:50px"
+         data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" 
+         data-ad-slot="XXXXXXXXXX"
+         data-full-width-responsive="false"></ins>
 </div>
     <div class="top-bar">
         <button id="open-sidebar" class="constant-menu-btn" onclick="toggleSidebar()">
@@ -212,13 +208,13 @@
                     <input type="text" id="setup-name" class="inp-select-pro" placeholder="Enter Full Name">
                     
                     <label style="margin-top:15px;">University</label>
-                    <input type="text" id="setup-uni" class="inp-select-pro" placeholder="e.g. University of Ibadan">
+                    <input type="text" id="setup-uni" class="inp-select-pro" placeholder="e.g. University or Polytechnic">
                     
                     <label style="margin-top:15px;">Faculty</label>
-                    <input type="text" id="setup-faculty" class="inp-select-pro" placeholder="e.g. Technology">
+                    <input type="text" id="setup-faculty" class="inp-select-pro" placeholder="e.g. Faculty">
                     
                     <label style="margin-top:15px;">Department</label>
-                    <input type="text" id="setup-dept" class="inp-select-pro" placeholder="e.g. Electrical Engineering">
+                    <input type="text" id="setup-dept" class="inp-select-pro" placeholder="e.g. Dept">
                     
                     <label style="margin-top:15px;">Current Level</label>
                     <select id="setup-level" class="inp-select-pro">
@@ -231,7 +227,7 @@
                     </select>
                        <div class="profile-group">
     <label>Total Units for Degree:</label>
-    <input type="number" id="prof-total-units" placeholder="e.g. 120 or 200" class="inp-select-pro">
+    <input type="number" id="prof-total-units" placeholder="e.g. " class="inp-select-pro">
 </div>
                     
                 </div>
