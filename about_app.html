@@ -1,9 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>(function(){var t=localStorage.getItem('ev-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About | Exam Venture</title>
+    <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#fbbf24">
+<link rel="apple-touch-icon" href="/icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -114,6 +118,14 @@
             text-transform: uppercase;
             letter-spacing: 2px;
         }
+        [data-theme="light"] body { background: #f0f2f5; color: #1a1a1a; }
+        [data-theme="light"] .about-container { background: #fff; border-color: #e0e0e0; }
+        [data-theme="light"] .content-section p { color: #333; }
+        [data-theme="light"] .mission-box { background: rgba(251,191,36,0.08); border-color: #b45309; }
+        [data-theme="light"] .feature-item { color: #5f6368; }
+        [data-theme="light"] .btn-back { background: rgba(0,0,0,0.05); border-color: #e0e0e0; color: #5f6368; }
+        [data-theme="light"] .btn-back:hover { background: rgba(251,191,36,0.15); color: #b45309; }
+        [data-theme="light"] .footer-brand { color: #5f6368; }
     </style>
 </head>
 <body>
@@ -121,7 +133,7 @@
     <div class="about-container">
         <div class="ev-logo-badge"><img src="logo4.png" style="width: 100px; height: auto;"></div>
         <h1>Exam Venture</h1>
-        <span class="version">V1.0 • Build for Nigerian Students</span>
+        <span class="version">V1.0 • Built for Nigerian Students</span>
         
         <div class="content-section">
             <p>
