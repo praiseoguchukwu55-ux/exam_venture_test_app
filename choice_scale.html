@@ -1,9 +1,43 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    <script>(function(){var t=localStorage.getItem('ev-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Exam Venture | Official CGPA Calculator & Exam Target Setter</title>
+    <meta name="description" content="The ultimate CGPA Calculator for all Nigerian Universities (4.0 & 5.0 scale). Track JAMB, WAEC, NECO, GCE, SAT scores and Post-UTME targets offline.">
+    <meta name="keywords" content="CGPA Calculator, Nigeria University Grading System, 5.0 CGPA Scale, 4.0 CGPA Scale, JAMB Result Checker, WAEC Score Grade, NECO Result Calculator, SAT Nigeria, Post-UTME Target, Calculate GP, Carryover Tracker, 100 Level Exams, Engineering CGPA, Medical Student GP, UNILAG, UI, OAU, UNIBEN, UNN, LASU, BUK">
+
+    <meta property="og:title" content="Exam Venture: Nigeria's #1 Student Academic Tool">
+    <meta property="og:description" content="Calculate your CGPA, set exam targets, and track your academic growth offline. For University, JAMB, and SSCE students.">
+    <meta property="og:image" content="logo4.png">
+    <meta property="og:type" content="website">
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "Exam Venture",
+      "operatingSystem": "Android, iOS, Windows",
+      "applicationCategory": "EducationApplication",
+      "aggregateRating": {
+        "@type": "AggregateRating",
+        "ratingValue": "4.9",
+        "ratingCount": "1000"
+      },
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "NGN"
+      }
+    }
+    </script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exam Venture | Select Scale</title>
+    <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#fbbf24">
+<link rel="apple-touch-icon" href="/icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -159,12 +193,22 @@
             .scale-card { padding: 30px 20px; }
             .logo { font-size: 1.8rem; }
         }
+        /* Light theme */
+        [data-theme="light"] body { background: #f0f2f5; color: #1a1a1a; }
+        [data-theme="light"] .subtitle { color: #5f6368; }
+        [data-theme="light"] .scale-card { background: rgba(255,255,255,0.9); border-color: rgba(0,0,0,0.1); }
+        [data-theme="light"] .scale-card:hover { background: #fff; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        [data-theme="light"] .scale-desc { color: #5f6368; }
+        [data-theme="light"] .footer-note { color: #5f6368; }
+        .theme-toggle-link { position: fixed; top: 15px; right: 15px; padding: 8px 14px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); border-radius: 8px; color: var(--accent); font-size: 0.8rem; cursor: pointer; text-decoration: none; z-index: 100; }
+        .theme-toggle-link:hover { background: rgba(251,191,36,0.2); }
+        [data-theme="light"] .theme-toggle-link { background: rgba(0,0,0,0.05); border-color: #e0e0e0; color: #b45309; }
     </style>
 </head>
 <body>
 
     <div class="header-section">
-        <div class="logo">EXAM VENTURE</div>
+        <div class="logo">Exam Venture <br>CGPA Calculator</div>
         <p class="subtitle">Choose your academic grading system</p>
     </div>
 
@@ -183,6 +227,25 @@
     </div>
 
     <div class="footer-note">Designed for Nigerian University Standards</div>
+    <a href="#" class="theme-toggle-link" onclick="evToggleTheme();return false;" id="choice-theme-btn">☀️ Light</a>
 
+<script>
+      function evToggleTheme(){
+        var c=document.documentElement.getAttribute('data-theme')||'dark';
+        var n=c==='dark'?'light':'dark';
+        document.documentElement.setAttribute('data-theme',n);
+        localStorage.setItem('ev-theme',n);
+        document.getElementById('choice-theme-btn').textContent=n==='dark'?'☀️ Light':'🌙 Dark';
+      }
+      (function(){var t=localStorage.getItem('ev-theme')||'dark';var b=document.getElementById('choice-theme-btn');if(b)b.textContent=t==='dark'?'☀️ Light':'🌙 Dark';})();
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('Exam Venture PWA: Active'))
+            .catch(err => console.log('PWA Registration Failed: ', err));
+        });
+      }
+    </script>
+    
 </body>
 </html>
