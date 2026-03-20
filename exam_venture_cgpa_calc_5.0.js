@@ -1,4 +1,28 @@
 /**
+ * THEME (Light / Dark)
+ */
+const THEME_KEY = 'ev-theme';
+
+function initTheme() {
+    const saved = localStorage.getItem(THEME_KEY) || 'dark';
+    document.documentElement.setAttribute('data-theme', saved);
+    updateThemeButton(saved);
+}
+
+function toggleTheme() {
+    const current = document.documentElement.getAttribute('data-theme') || 'dark';
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem(THEME_KEY, next);
+    updateThemeButton(next);
+}
+
+function updateThemeButton(theme) {
+    const btn = document.getElementById('theme-toggle-btn');
+    if (btn) btn.textContent = theme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+}
+
+/**
  * UI & VIEW CONTROLS
  */
 function toggleSidebar() {
@@ -33,6 +57,9 @@ function switchView(viewId) {
     // --- NEW: AUTO-UPDATE MATH WHEN TABS CHANGE ---
     if (viewId === 'view-target' || viewId === 'view-dashboard') {
         updateRemainingUnitsDisplay();
+    }
+    if (viewId === 'view-calc') {
+        setTimeout(updateProjectedCGPA, 100);
     }
     
     // 3. Close sidebar
@@ -75,13 +102,17 @@ function renderCourseRow(code = '', unit = '', grade = '5') {
 
 function addCourseRow() {
     renderCourseRow();
+    setTimeout(updateProjectedCGPA, 50);
 }
 
 function removeRow(btn) {
     const row = btn.parentElement;
     row.style.opacity = '0';
     row.style.transform = 'translateX(20px)';
-    setTimeout(() => row.remove(), 200);
+    setTimeout(() => {
+        row.remove();
+        updateProjectedCGPA();
+    }, 200);
 }
 
 function populateSemesters() {
@@ -104,20 +135,54 @@ function populateSemesters() {
     select.addEventListener('change', (e) => loadSemesterData(e.target.value));
 }
 
+function updateProjectedCGPA() {
+    const el = document.getElementById('projected-cgpa');
+    if (!el) return;
+    const selectedSem = document.getElementById('sem-select')?.value;
+    if (!selectedSem) { el.textContent = '--'; return; }
+
+    let totalPoints = 0, totalUnits = 0;
+
+    // Other saved semesters
+    Object.keys(localStorage).filter(k => k.startsWith("data-") && k !== `data-${selectedSem}`).forEach(key => {
+        JSON.parse(localStorage.getItem(key)).forEach(c => {
+            const u = parseInt(c.unit) || 0;
+            totalUnits += u;
+            totalPoints += (u * (parseInt(c.grade) || 0));
+        });
+    });
+
+    // Current form (edited semester)
+    document.querySelectorAll('.course-row').forEach(row => {
+        const code = row.querySelector('.inp-code')?.value;
+        const unit = parseInt(row.querySelector('.inp-unit')?.value) || 0;
+        const grade = parseInt(row.querySelector('.inp-grade')?.value) || 0;
+        if (code || unit > 0) {
+            totalUnits += unit;
+            totalPoints += (unit * grade);
+        }
+    });
+
+    if (totalUnits === 0) { el.textContent = '--'; return; }
+    el.textContent = (totalPoints / totalUnits).toFixed(2);
+}
+
 /**
  * DATA PERSISTENCE (SAVE & LOAD)
  */
 function loadSemesterData(semesterKey) {
     const container = document.getElementById('course-container');
-    container.innerHTML = ''; // Wipe current view
+    container.innerHTML = '';
     
     const savedData = localStorage.getItem(`data-${semesterKey}`);
     if (savedData) {
         JSON.parse(savedData).forEach(c => renderCourseRow(c.code, c.unit, c.grade));
     } else {
-        // Default clean template: 5 empty rows
         for(let i=0; i<5; i++) renderCourseRow();
     }
+    const notesEl = document.getElementById('semester-notes');
+    if (notesEl) notesEl.value = localStorage.getItem(`notes-5-${semesterKey}`) || '';
+    setTimeout(updateProjectedCGPA, 50);
 }
 
 function saveSemesterData() {
@@ -146,8 +211,9 @@ function saveSemesterData() {
         return;
     }
 
-    // 2. Commit to LocalStorage
     localStorage.setItem(`data-${selectedSem}`, JSON.stringify(semesterData));
+    const notes = document.getElementById('semester-notes')?.value?.trim() || '';
+    localStorage.setItem(`notes-5-${selectedSem}`, notes);
 
     // 3. Update all Dashboard numbers (CGPA, Class, Units)
     updateDashboard(); 
@@ -223,18 +289,162 @@ function updateDashboard() {
         `;
     }
 
-    renderAcademicHistory(); // Refresh the list with Semester GPAs
+    renderAcademicHistory();
+    renderGpaTrendChart();
+    renderGradeDistributionChart();
+}
+
+let gpaTrendChartInstance = null;
+let gradeDistChartInstance = null;
+
+function renderGpaTrendChart() {
+    const keys = Object.keys(localStorage).filter(k => k.startsWith("data-")).sort();
+    const canvas = document.getElementById('gpa-trend-chart');
+    const emptyMsg = document.getElementById('gpa-chart-empty');
+    if (!canvas) return;
+
+    if (keys.length === 0) {
+        canvas.parentElement.style.display = 'none';
+        if (emptyMsg) emptyMsg.style.display = 'block';
+        if (gpaTrendChartInstance) {
+            gpaTrendChartInstance.destroy();
+            gpaTrendChartInstance = null;
+        }
+        return;
+    }
+
+    canvas.parentElement.style.display = 'block';
+    if (emptyMsg) emptyMsg.style.display = 'none';
+
+    let cumulativePoints = 0, cumulativeUnits = 0;
+    const labels = [];
+    const cgpaData = [];
+
+    keys.forEach(key => {
+        const semesterData = JSON.parse(localStorage.getItem(key));
+        let sPoints = 0, sUnits = 0;
+        semesterData.forEach(c => {
+            const u = parseInt(c.unit) || 0;
+            sUnits += u;
+            sPoints += (u * (parseInt(c.grade) || 0));
+        });
+        cumulativePoints += sPoints;
+        cumulativeUnits += sUnits;
+        const cgpa = cumulativeUnits > 0 ? parseFloat((cumulativePoints / cumulativeUnits).toFixed(2)) : 0;
+        labels.push(key.replace('data-', '').replace('-', ' Lvl '));
+        cgpaData.push(cgpa);
+    });
+
+    if (gpaTrendChartInstance) gpaTrendChartInstance.destroy();
+
+    const ctx = canvas.getContext('2d');
+    gpaTrendChartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels,
+            datasets: [{
+                label: 'CGPA',
+                data: cgpaData,
+                borderColor: '#fbbf24',
+                backgroundColor: 'rgba(251, 191, 36, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.3,
+                pointBackgroundColor: '#fbbf24',
+                pointBorderColor: '#0b0e14',
+                pointBorderWidth: 1,
+                pointRadius: 4,
+                pointHoverRadius: 6
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    grid: { color: 'rgba(255,255,255,0.06)' },
+                    ticks: { color: '#8b949e', maxRotation: 45, fontSize: 10 }
+                },
+                y: {
+                    min: 0,
+                    max: 5,
+                    grid: { color: 'rgba(255,255,255,0.06)' },
+                    ticks: { color: '#8b949e', fontSize: 10 }
+                }
+            }
+        }
+    });
+}
+
+function renderGradeDistributionChart() {
+    const gradeMap = { "5": "A", "4": "B", "3": "C", "2": "D", "1": "E", "0": "F" };
+    const unitCount = { "5": 0, "4": 0, "3": 0, "2": 0, "1": 0, "0": 0 };
+    const colors = { "5": "#4caf50", "4": "#2196f3", "3": "#ffc107", "2": "#ff9800", "1": "#f44336", "0": "#9e9e9e" };
+
+    Object.keys(localStorage).filter(k => k.startsWith("data-")).forEach(key => {
+        JSON.parse(localStorage.getItem(key)).forEach(c => {
+            const u = parseInt(c.unit) || 0;
+            const g = String(c.grade ?? 0);
+            if (u > 0 && unitCount.hasOwnProperty(g)) unitCount[g] += u;
+        });
+    });
+
+    const total = Object.values(unitCount).reduce((a, b) => a + b, 0);
+    const canvas = document.getElementById('grade-dist-chart');
+    const emptyMsg = document.getElementById('grade-dist-empty');
+    if (!canvas) return;
+
+    if (total === 0) {
+        canvas.parentElement.style.display = 'none';
+        if (emptyMsg) emptyMsg.style.display = 'block';
+        if (gradeDistChartInstance) { gradeDistChartInstance.destroy(); gradeDistChartInstance = null; }
+        return;
+    }
+
+    canvas.parentElement.style.display = 'block';
+    if (emptyMsg) emptyMsg.style.display = 'none';
+
+    const labels = [];
+    const data = [];
+    const bgColors = [];
+    ["5", "4", "3", "2", "1", "0"].forEach(g => {
+        if (unitCount[g] > 0) {
+            labels.push(`${gradeMap[g]} (${unitCount[g]} units)`);
+            data.push(unitCount[g]);
+            bgColors.push(colors[g]);
+        }
+    });
+
+    if (gradeDistChartInstance) gradeDistChartInstance.destroy();
+
+    const ctx = canvas.getContext('2d');
+    gradeDistChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data: { labels, datasets: [{ data, backgroundColor: bgColors, borderColor: '#161b22', borderWidth: 2 }] },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '60%',
+            plugins: {
+                legend: { position: 'bottom', labels: { color: '#8b949e', font: { size: 10 }, boxWidth: 12 } }
+            }
+        }
+    });
 }
 
 function getRemainingUnits() {
-    const TOTAL_DEGREE_UNITS = 200; // Adjust for UI EEE Handbook
+    const profile = JSON.parse(localStorage.getItem('student-profile') || '{}');
+    const totalDegreeUnits = parseFloat(profile.totalUnits) || 200;
     let earnedUnits = 0;
     Object.keys(localStorage).filter(k => k.startsWith("data-")).forEach(key => {
         JSON.parse(localStorage.getItem(key)).forEach(c => earnedUnits += (parseInt(c.unit) || 0));
     });
     
     const remainingInput = document.getElementById('remaining-units');
-    if (remainingInput) remainingInput.value = Math.max(0, TOTAL_DEGREE_UNITS - earnedUnits);
+    if (remainingInput) remainingInput.value = Math.max(0, totalDegreeUnits - earnedUnits);
 }
 
 function calculateTarget() {
@@ -396,6 +606,36 @@ function calculateTarget() {
     triggerAdRefresh();
 }
 
+function exportBackupJSON() {
+    const profile = JSON.parse(localStorage.getItem('student-profile') || '{}');
+    const semesters = {};
+    Object.keys(localStorage)
+        .filter(k => k.startsWith("data-"))
+        .sort()
+        .forEach(key => {
+            const shortKey = key.replace('data-', '');
+            semesters[shortKey] = JSON.parse(localStorage.getItem(key) || '[]');
+        });
+    const semesterNotes = {};
+    Object.keys(localStorage).filter(k => k.startsWith("notes-5-")).forEach(k => {
+        semesterNotes[k.replace('notes-5-', '')] = localStorage.getItem(k) || '';
+    });
+    const backup = {
+        version: "5.0",
+        exportedAt: new Date().toISOString(),
+        profile,
+        semesters,
+        semesterNotes
+    };
+    const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `ExamVenture_5.0_Backup_${new Date().toISOString().slice(0, 10)}.json`;
+    a.click();
+    URL.revokeObjectURL(a.href);
+    alert("Backup downloaded! Use 'Import from File' to restore on another device.");
+}
+
 function exportToPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
@@ -452,7 +692,8 @@ function exportToPDF() {
 
     Object.keys(localStorage).filter(k => k.startsWith("data-")).sort().reverse().forEach(key => {
         if (y > 240) { doc.addPage(); y = 30; }
-        const semTitle = key.replace('data-', '').replace('-', ' Level - ');
+        const semKey = key.replace('data-', '');
+        const semTitle = semKey.replace('-', ' Level - ');
         y = drawTableHeader(y, semTitle);
         const semesterData = JSON.parse(localStorage.getItem(key));
         semesterData.forEach((c, index) => {
@@ -465,6 +706,15 @@ function exportToPDF() {
             doc.text(getLetterGrade(c.grade), 165, y + 5);
             y += 7;
         });
+        const notes = localStorage.getItem(`notes-5-${semKey}`) || '';
+        if (notes) {
+            doc.setFontSize(8);
+            doc.setTextColor(100, 100, 100);
+            doc.text('Note: ' + notes, 20, y + 5);
+            doc.setFontSize(9);
+            doc.setTextColor(0, 0, 0);
+            y += 10;
+        }
         y += 15;
     });
 
@@ -497,7 +747,9 @@ const pageHeight = doc.internal.pageSize.height;
 }
 function clearAllData() {
     if (confirm("⚠️ DANGER: Delete ALL records?")) {
-        Object.keys(localStorage).forEach(k => k.startsWith("data-") && localStorage.removeItem(k));
+        Object.keys(localStorage).forEach(k => {
+            if (k.startsWith("data-") || k.startsWith("notes-5-")) localStorage.removeItem(k);
+        });
         updateDashboard();
         getRemainingUnits();
         loadSemesterData(document.getElementById('sem-select').value);
@@ -584,10 +836,21 @@ function renderAcademicHistory() {
 
         const sGpa = sUnits > 0 ? (sPoints / sUnits).toFixed(2) : "0.00";
         const title = key.replace('data-', '').replace('-', ' Level - ');
+        const semKey = key.replace('data-', '');
+        const notes = localStorage.getItem(`notes-5-${semKey}`) || '';
+        const raw = notes.length > 35 ? notes.substring(0, 35) + '...' : notes;
+        const notesPreview = notes ? raw.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;') : '';
 
         const card = document.createElement('div');
-        card.className = 'stats-card clickable-history'; 
-        card.onclick = () => switchView('view-calc');
+        card.className = 'stats-card clickable-history';
+        card.onclick = () => {
+            const semSelect = document.getElementById('sem-select');
+            if (semSelect) {
+                semSelect.value = semKey;
+                loadSemesterData(semKey);
+            }
+            switchView('view-calc');
+        };
         
         // Inline styles for the card layout
         card.style.textAlign = 'left';
@@ -603,6 +866,7 @@ function renderAcademicHistory() {
                         ${title}
                     </strong>
                     <p style="font-size: 0.75rem; color: var(--text-dim)">${sUnits} Total Units</p>
+                    ${notesPreview ? `<p style="font-size: 0.7rem; color: var(--text-dim); font-style: italic; margin-top: 4px;">"${notesPreview}"</p>` : ''}
                 </div>
 
                 <div style="display: flex; align-items: center; gap: 20px; margin-left: 15px;">
@@ -632,12 +896,13 @@ function renderAcademicHistory() {
     });
 }
 
-// Function to handle the actual deletion
 function deleteSemester(key) {
     const title = key.replace('data-', '').replace('-', ' Level - ');
     if (confirm(`Delete ${title} history?`)) {
         localStorage.removeItem(key);
-        updateDashboard(); // Refresh everything
+        const semKey = key.replace('data-', '');
+        localStorage.removeItem(`notes-5-${semKey}`);
+        updateDashboard();
     }
 }
 function checkLogin() {
@@ -665,13 +930,49 @@ function unlockApp() {
     switchView('view-dashboard');
     document.querySelector('.top-bar').style.display = 'flex';
     document.getElementById('login-pin').value = '';
-    // Show ad house if it exists
     const adHouse = document.getElementById('ad-container-bottom');
     if (adHouse) adHouse.style.display = 'block';
+    if (!localStorage.getItem('ev-onboarding-5-done')) showOnboarding();
+}
+
+const ONBOARDING_KEY_5 = 'ev-onboarding-5-done';
+
+function showOnboarding() {
+    const overlay = document.getElementById('onboarding-overlay');
+    if (!overlay) return;
+    overlay.style.display = 'flex';
+    document.getElementById('onboarding-step-1').style.display = 'block';
+    document.getElementById('onboarding-step-2').style.display = 'none';
+    document.getElementById('onboarding-step-3').style.display = 'none';
+}
+
+function onboardingNext() {
+    const s1 = document.getElementById('onboarding-step-1');
+    const s2 = document.getElementById('onboarding-step-2');
+    const s3 = document.getElementById('onboarding-step-3');
+    if (s1.style.display !== 'none') {
+        s1.style.display = 'none';
+        s2.style.display = 'block';
+    } else if (s2.style.display !== 'none') {
+        s2.style.display = 'none';
+        s3.style.display = 'block';
+    }
+}
+
+function onboardingComplete() {
+    localStorage.setItem(ONBOARDING_KEY_5, 'true');
+    document.getElementById('onboarding-overlay').style.display = 'none';
+    switchView('view-calc');
+}
+
+function onboardingSkip() {
+    localStorage.setItem(ONBOARDING_KEY_5, 'true');
+    document.getElementById('onboarding-overlay').style.display = 'none';
 }
 
 // 3. CLEAN INITIALIZATION (Combined into ONE function)
 window.onload = function() {
+    initTheme();
     populateSemesters();
     updateDashboard();
     getRemainingUnits();
@@ -679,6 +980,13 @@ window.onload = function() {
     
     const semSelect = document.getElementById('sem-select');
     if(semSelect) loadSemesterData(semSelect.value);
+
+    // What-if: update projected CGPA when user changes grades/units
+    const viewCalc = document.getElementById('view-calc');
+    if (viewCalc) {
+        viewCalc.addEventListener('change', () => updateProjectedCGPA());
+        viewCalc.addEventListener('input', () => updateProjectedCGPA());
+    }
 };
 
 function handleReset() {
@@ -716,6 +1024,52 @@ function updateRemainingUnitsDisplay() {
 
     const remaining = totalRequired - completedUnits;
     remainingInput.value = remaining > 0 ? remaining : 0;
+}
+
+// Import from JSON file (backup or course list)
+function importDataJSON(inputEl) {
+    const file = inputEl?.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        try {
+            const data = JSON.parse(e.target.result);
+            if (Array.isArray(data)) {
+                data.forEach(c => renderCourseRow(c.code, c.unit, c.grade));
+                alert(`Imported ${data.length} courses to current semester.`);
+            } else if (data.semesters && typeof data.semesters === 'object') {
+                const prefix = data.version === '4.0' ? 'data4-' : 'data-';
+                const notesPrefix = data.version === '4.0' ? 'notes-4-' : 'notes-5-';
+                Object.keys(data.semesters).forEach(semKey => {
+                    localStorage.setItem(prefix + semKey, JSON.stringify(data.semesters[semKey]));
+                });
+                if (data.semesterNotes) {
+                    Object.keys(data.semesterNotes).forEach(semKey => {
+                        localStorage.setItem(notesPrefix + semKey, data.semesterNotes[semKey] || '');
+                    });
+                }
+                if (data.profile) {
+                    localStorage.setItem(data.version === '4.0' ? 'student-profile-4' : 'student-profile', JSON.stringify(data.profile));
+                }
+                updateDashboard();
+                getRemainingUnits();
+                loadSemesterData(document.getElementById('sem-select').value);
+                applyProfile();
+                renderAcademicHistory();
+                alert(`Backup restored: ${Object.keys(data.semesters).length} semesters.`);
+            } else {
+                alert("Unsupported file format. Use a JSON array or Exam Venture backup file.");
+            }
+        } catch (err) {
+            alert("Invalid JSON file. Please check the format.");
+        }
+        inputEl.value = '';
+    };
+    reader.readAsText(file);
+}
+
+function triggerImportFile() {
+    document.getElementById('import-file').click();
 }
 
 // 1. Toggle the bulk drawer
@@ -787,7 +1141,8 @@ function processBulkJSON() {
 
         alert(`Successfully imported ${courses.length} courses!`);
         document.getElementById('json-paste-area').value = '';
-        toggleBulkInput(); // Close drawer
+        toggleBulkInput();
+        updateProjectedCGPA();
     } catch (e) {
         alert("Invalid format. Please make sure you copied the entire [...] list from the AI.");
     }
