@@ -554,6 +554,21 @@ body:has(#view-login.active) .top-bar {
     color: var(--text-dim);
 }
 
+.inp-notes {
+    width: 100%;
+    background: #1c2128;
+    border: 1px solid #30363d;
+    color: var(--text);
+    padding: 12px;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    resize: vertical;
+    min-height: 50px;
+}
+.inp-notes:focus { border-color: var(--accent); outline: none; }
+[data-theme="light"] .inp-notes { background: #f8f9fa; border-color: #dadce0; color: #1a1a1a; }
+
 .bulk-import-section { margin: 20px 0; width: 100%; }
 
 .btn-bulk-toggle {
@@ -682,4 +697,55 @@ button[onclick*="deleteSemester"]:hover {
     transform: scale(1.15);
     color: #ff6b6b !important;
 }
+
+/* ========== LIGHT THEME ========== */
+[data-theme="light"] {
+    --bg: #f0f2f5;
+    --card: #ffffff;
+    --accent: #b45309;
+    --text: #1a1a1a;
+    --text-dim: #5f6368;
+    --nav-navy: #e8eaed;
+    --sidebar-bg: #ffffff;
+}
+
+[data-theme="light"] body { background-color: #f0f2f5; color: #1a1a1a; }
+[data-theme="light"] .top-bar { background: rgba(255,255,255,0.95); border-bottom: 1px solid #e0e0e0; }
+[data-theme="light"] .constant-menu-btn { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); }
+[data-theme="light"] .hamburger-icon span { background: #1a1a1a; }
+[data-theme="light"] .sidebar { background-color: #fff; border-right-color: #e0e0e0; }
+[data-theme="light"] .stats-card { background: #fff; border-color: #e0e0e0; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+[data-theme="light"] .cgpa-circle { border-color: rgba(180,83,9,0.3); }
+[data-theme="light"] .profile-pic { background: linear-gradient(145deg,#fbbf24,#b45309); color: #fff; }
+[data-theme="light"] .btn-back { background: rgba(0,0,0,0.05); border-color: rgba(0,0,0,0.1); color: #5f6368; }
+[data-theme="light"] .btn-back:hover { background: rgba(0,0,0,0.08); color: #1a1a1a; }
+[data-theme="light"] .btn-secondary { background: #f8f9fa; border-color: #dadce0; color: #1a1a1a; }
+[data-theme="light"] .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+[data-theme="light"] .inp-select-pro, [data-theme="light"] #sem-select { background: #f8f9fa; border-color: #dadce0; color: #1a1a1a; }
+[data-theme="light"] .course-row input, [data-theme="light"] .course-row select { background: #f8f9fa; border-color: #dadce0; color: #1a1a1a; }
+[data-theme="light"] .bulk-drawer { background: #f8f9fa; border-color: #dadce0; }
+[data-theme="light"] .ai-instruction-card { background: #fff; border: 1px solid #e0e0e0; }
+[data-theme="light"] .code-copy-box { background: #f0f2f5; border-color: #dadce0; }
+[data-theme="light"] .code-copy-box code { color: #5f6368; }
+[data-theme="light"] #json-paste-area { background: #f8f9fa; border-color: #dadce0; color: #1a1a1a; }
+[data-theme="light"] .clickable-history { background: #fff; border-color: #e0e0e0; }
+[data-theme="light"] .clickable-history:hover { background: rgba(251,191,36,0.08)!important; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+[data-theme="light"] #view-login.active { background-color: #f0f2f5!important; }
+[data-theme="light"] .login-card { background: #fff!important; border-color: #e0e0e0; }
+[data-theme="light"] .overlay { background: rgba(0,0,0,0.3); }
+[data-theme="light"] .theme-toggle-btn { background: rgba(0,0,0,0.05); border-color: #e0e0e0; color: #1a1a1a; }
+[data-theme="light"] .theme-toggle-btn:hover { background: rgba(0,0,0,0.08); }
+
+.theme-toggle-btn {
+    width: 100%; padding: 10px 14px; margin-bottom: 10px;
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px; color: var(--text); font-size: 0.85rem; font-weight: 600;
+    cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.theme-toggle-btn:hover { background: rgba(251,191,36,0.1); border-color: var(--accent); }
+
+.onboarding-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.75); z-index: 3000; display: flex; align-items: center; justify-content: center; padding: 20px; animation: fadeIn 0.3s ease; }
+.onboarding-card { background: var(--card); border: 1px solid rgba(251,191,36,0.3); border-radius: 20px; padding: 28px; max-width: 380px; width: 100%; box-shadow: 0 20px 50px rgba(0,0,0,0.5); }
+.onboarding-step h3 { font-size: 1.1rem; }
+[data-theme="light"] .onboarding-card { background: #fff; border-color: #e0e0e0; box-shadow: 0 10px 40px rgba(0,0,0,0.15); }
 
