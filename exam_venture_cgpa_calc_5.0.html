@@ -1,8 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-
+    <script>
+        (function(){var t=localStorage.getItem('ev-theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -36,17 +39,21 @@
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Professional CGPA Calculator</title>
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#fbbf24">
+<link rel="apple-touch-icon" href="/icon-192.png">
     <link rel="stylesheet" href="exam_venture_cgpa_calc_5.0.css">
 </head>
 <body>
 
   <div id="ad-house" style="background: #020617; display: flex; align-items: center; justify-content: center; overflow: hidden; height: 60px;">
+    <div id="dynamic-ad-wrapper" style="width:100%; display:flex; justify-content:center;">
     <ins class="adsbygoogle"
          style="display:block; width:320px; height:50px"
          data-ad-client="ca-pub-XXXXXXXXXXXXXXXX" 
          data-ad-slot="XXXXXXXXXX"
          data-full-width-responsive="false"></ins>
+    </div>
 </div>
     <div class="top-bar">
         <button id="open-sidebar" class="constant-menu-btn" onclick="toggleSidebar()">
@@ -86,7 +93,7 @@
                 <span class="icon">➕</span>
                 <div class="nav-text">
                     <strong>CGPA</strong>
-                    <small>Caculator</small>
+                    <small>Calculator</small>
                 </div>
             </div>
 
@@ -123,7 +130,6 @@
         </div>
     </div>
 </a>
-</a>
      <a href="privacy_policy.html" class="nav-item-link">
     <div class="nav-item">
         <span class="nav-icon">⚖️</span>
@@ -133,12 +139,34 @@
     </div>
 </a>
         <div class="sidebar-links">
+            <button onclick="toggleTheme()" class="theme-toggle-btn" id="theme-toggle-btn">☀️ Light Mode</button>
             <button onclick="clearAllData()" class="btn-reset-sidebar">Wipe All Data</button>
             <p class="sidebar-footer">Exam Venture v1.0</p>
         </div>
     </div>
 
     <div id="overlay" class="overlay" onclick="toggleSidebar()"></div>
+
+    <div id="onboarding-overlay" class="onboarding-overlay" style="display:none;">
+        <div class="onboarding-card">
+            <div id="onboarding-step-1" class="onboarding-step">
+                <h3 style="color: var(--accent); margin-bottom: 12px;">👋 Welcome to Exam Venture!</h3>
+                <p style="color: var(--text-dim); font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">Your PIN is set. Let's get you started in 2 quick steps so you can track your CGPA like a pro.</p>
+                <button class="btn-save" onclick="onboardingNext()">Next</button>
+            </div>
+            <div id="onboarding-step-2" class="onboarding-step" style="display:none;">
+                <h3 style="color: var(--accent); margin-bottom: 12px;">📋 Step 1: Add Your Profile</h3>
+                <p style="color: var(--text-dim); font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">Enter your name, university, and department in Profile. This personalizes your dashboard and powers the Target Tracker.</p>
+                <button class="btn-save" onclick="onboardingNext()">Next</button>
+            </div>
+            <div id="onboarding-step-3" class="onboarding-step" style="display:none;">
+                <h3 style="color: var(--accent); margin-bottom: 12px;">📚 Step 2: Add Your First Semester</h3>
+                <p style="color: var(--text-dim); font-size: 0.95rem; line-height: 1.5; margin-bottom: 20px;">Select a semester, add your courses with units and grades, then save. Your CGPA will update instantly!</p>
+                <button class="btn-save" onclick="onboardingComplete()">Let's Go!</button>
+            </div>
+            <a href="#" onclick="onboardingSkip(); return false;" style="display:block; text-align:center; margin-top:12px; font-size:0.8rem; color: var(--text-dim);">Skip for now</a>
+        </div>
+    </div>
 
     <div class="app-container">
        <section id="view-login" class="view active">
@@ -162,7 +190,7 @@
 </section>
 
 <input type="file" id="import-file" hidden onchange="importDataJSON(this)">
-        <section id="view-dashboard" class="view active">
+        <section id="view-dashboard" class="view">
             <div class="profile-info">
                 <div class="profile-pic" id="prof-dept-short">Dept</div>
                 <h3 id="prof-level">---</h3>
@@ -190,11 +218,28 @@
                 </div>
             </div>
 
+            <div class="stats-card" id="gpa-chart-card">
+                <h4 style="margin-bottom:12px; font-size:0.95rem; color: var(--accent);">📈 GPA Trend</h4>
+                <div style="position:relative; height:180px;">
+                    <canvas id="gpa-trend-chart"></canvas>
+                </div>
+                <p id="gpa-chart-empty" style="display:none; text-align:center; color:var(--text-dim); font-size:0.85rem; padding:20px;">Add semesters to see your GPA trend</p>
+            </div>
+
+            <div class="stats-card" id="grade-dist-card">
+                <h4 style="margin-bottom:12px; font-size:0.95rem; color: var(--accent);">📊 Grade Distribution</h4>
+                <div style="position:relative; height:180px;">
+                    <canvas id="grade-dist-chart"></canvas>
+                </div>
+                <p id="grade-dist-empty" style="display:none; text-align:center; color:var(--text-dim); font-size:0.85rem; padding:20px;">Add semesters to see grade spread</p>
+            </div>
+
             <div class="section-title">
                 <h3>Academic History</h3>
             </div>
             <div class="semester-list" id="dynamic-sem-list"></div>
             <button class="btn-secondary" onclick="exportToPDF()">Export Report (PDF)</button>
+            <button class="btn-secondary" onclick="exportBackupJSON()">Export Backup (JSON)</button>
         </section>
         <section id="view-profile" class="view">
             <header class="view-header">
@@ -246,6 +291,17 @@
                 <select id="sem-select" class="inp-select-pro"></select>
             </div>
 
+            <div class="selection-group" style="margin-bottom: 12px;">
+                <label for="semester-notes">📝 Semester Notes (optional)</label>
+                <textarea id="semester-notes" class="inp-notes" placeholder="e.g. Stressful semester, Strike period, Changed department..." rows="2"></textarea>
+            </div>
+
+            <div class="stats-card" id="whatif-card" style="margin-bottom:16px; padding:14px;">
+                <h4 style="font-size:0.9rem; color: var(--accent); margin-bottom:6px;">🔮 What-if Preview</h4>
+                <p style="margin:0; font-size:1.5rem; font-weight:bold;" id="projected-cgpa">--</p>
+                <small style="color: var(--text-dim); font-size:0.75rem;">CGPA if you save now • Updates as you change grades</small>
+            </div>
+
             <div class="course-list" id="course-container"></div>
 
             <div class="action-bar">
@@ -255,6 +311,9 @@
 <div class="bulk-import-section">
     <button class="btn-bulk-toggle" onclick="toggleBulkInput()">
         ✨ Bulk Import from AI Scan
+    </button>
+    <button class="btn-bulk-toggle" onclick="triggerImportFile()" style="margin-top:8px;">
+        📁 Import from File
     </button>
 
     <div id="bulk-input-area" class="bulk-drawer" style="display: none;">
