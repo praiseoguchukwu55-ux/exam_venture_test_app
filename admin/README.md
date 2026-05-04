@@ -62,13 +62,18 @@ All content is stored in the browser's localStorage, which means:
 - No backend server required
 - Fast and instant synchronization
 - Works completely offline
+All content is stored on the server in `data/store.json`, which means:
+- Data is shared across all users and devices
+- Changes persist after deployment
+- The main website always reads the latest saved content
+- A running Node server is required
 
 ### Content Synchronization
 When you make changes in the admin panel:
-1. Data is saved to localStorage
-2. Main website automatically reads from localStorage
-3. Changes appear instantly on the main site
-4. No refresh needed
+1. Data is saved to the shared backend API
+2. Main website automatically reads from the API
+3. Changes appear on the main site after refresh
+4. No browser-only content store is used
 
 ## Important Notes
 
@@ -128,12 +133,8 @@ admin/
 ## Technical Details
 
 ### localStorage Keys
-- `tmcMessages` - Stores message content
-- `tmcVideos` - Stores video content
-- `tmcSongs` - Stores song library
-- `tmcEbooks` - Stores e-book resources
-- `tmcLinks` - Stores resource links
-- `tmcRadioSettings` - Stores radio configuration
+### Server Data Store
+- `data/store.json` - Stores messages, videos, songs, ebooks, links, people, images, and radio settings
 
 ### Data Structure Example
 ```javascript

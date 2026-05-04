@@ -82,7 +82,7 @@ Monday-Friday 6:00 AM</textarea>
         }
 
         function loadRadioSettings() {
-            const settings = JSON.parse(localStorage.getItem('tmcRadioSettings') || '{}');
+            const settings = AdminData.getRadioSettings();
             document.getElementById('radioTitle').value = settings.title || 'Listen Live';
             document.getElementById('radioDescription').value = settings.description || 'Tune in to our weekly radio broadcast and devotion sessions.';
             document.getElementById('radioStreamUrl').value = settings.streamUrl || '';
@@ -99,7 +99,7 @@ Monday-Friday 6:00 AM</textarea>
                 schedule: document.getElementById('radioSchedule').value
             };
 
-            localStorage.setItem('tmcRadioSettings', JSON.stringify(settings));
+            AdminData.saveRadioSettings(settings);
             showAlert('Radio settings saved successfully!', 'success');
         }
 

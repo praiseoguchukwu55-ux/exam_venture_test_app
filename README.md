@@ -1,6 +1,6 @@
 # The Metropolitan Church, Ibadan - Website
 
-A modern, responsive website for The Metropolitan Church, Ibadan. Built with HTML5, CSS3, and vanilla JavaScript.
+A modern, responsive website for The Metropolitan Church, Ibadan. Built with HTML5, CSS3, vanilla JavaScript, and a lightweight Node backend for shared content storage.
 
 ## Features
 
@@ -20,6 +20,7 @@ A modern, responsive website for The Metropolitan Church, Ibadan. Built with HTM
   - Radio player controls
   - Contact form
   - Social media links
+- **Shared Content API** - Admin changes are saved on the server and shown to all visitors
 - **Accessibility** - Semantic HTML and keyboard navigation support
 
 ## Project Structure
@@ -29,26 +30,28 @@ TMC Church/
 ├── index.html      - Main website HTML
 ├── styles.css      - Styling and responsive design
 ├── script.js       - Interactive functionality
+├── server.js       - Node server and API
+├── package.json    - Start script for deployment
+├── data/store.json - Persistent shared content store
 └── README.md       - Documentation (this file)
 ```
 
 ## Getting Started
 
-### Quick Start (No Installation Required)
+### Quick Start
 
-1. **Open in Browser**
-   - Simply open `index.html` in any modern web browser
-   - No server or build tools required
+1. **Start the server**
+   - Run `npm start`
+   - Open `http://localhost:3000`
 
 2. **Live Development** (Optional - Using VS Code)
    - Install the "Live Server" extension in VS Code
-   - Right-click on `index.html` and select "Open with Live Server"
-   - Changes will auto-refresh in your browser
+   - For the shared data flow, use the Node server instead of opening the HTML file directly
 
 ### System Requirements
 
 - Modern web browser (Chrome, Firefox, Safari, Edge)
-- No dependencies or installation needed
+- Node.js 18+ for the backend server
 
 ## Customization Guide
 
@@ -82,6 +85,7 @@ Edit the CSS variables in `styles.css` (top of file):
 2. **Media Grid** - Update titles, descriptions, and links
 3. **Contact Information** - Add real phone, email, address, service times
 4. **Footer** - Customize "About Us" text and social media handles
+5. **Admin Panel** - Content saved from the admin area updates the shared JSON store
 
 ### Add Images
 
