@@ -3,6 +3,48 @@
 // ============================================
 const navToggle = document.getElementById('navToggle');
 const navMenu = document.getElementById('navMenu');
+const themeStorageKey = 'tmcTheme';
+
+function getPreferredTheme() {
+    const savedTheme = localStorage.getItem(themeStorageKey);
+    if (savedTheme === 'light' || savedTheme === 'dark') {
+        return savedTheme;
+    }
+
+    return 'light';
+}
+
+function applyTheme(theme) {
+    document.body.dataset.theme = theme;
+    const toggleButton = document.getElementById('themeToggle');
+    if (toggleButton) {
+        toggleButton.setAttribute('aria-pressed', theme === 'dark' ? 'true' : 'false');
+        toggleButton.textContent = theme === 'dark' ? 'Light Mode' : 'Dark Mode';
+    }
+}
+
+function toggleTheme() {
+    const nextTheme = document.body.dataset.theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem(themeStorageKey, nextTheme);
+    applyTheme(nextTheme);
+}
+
+function injectThemeToggle() {
+    if (document.getElementById('themeToggle')) {
+        return;
+    }
+
+    const toggleButton = document.createElement('button');
+    toggleButton.type = 'button';
+    toggleButton.id = 'themeToggle';
+    toggleButton.className = 'theme-toggle theme-toggle-fab';
+    toggleButton.addEventListener('click', toggleTheme);
+    document.body.appendChild(toggleButton);
+    applyTheme(document.body.dataset.theme || getPreferredTheme());
+}
+
+applyTheme(getPreferredTheme());
+document.addEventListener('DOMContentLoaded', injectThemeToggle);
 
 if (navToggle && navMenu) {
     navToggle.addEventListener('click', () => {
