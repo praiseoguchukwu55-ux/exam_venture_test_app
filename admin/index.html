@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | The Metropolitan Church</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <div class="admin-header">
+        <div class="container">
+            <div class="header-actions">
+                <div>
+                    <h1>Admin Dashboard</h1>
+                    <p>The Metropolitan Church Content Management</p>
+                </div>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="admin-nav">
+            <a href="index.html" class="nav-link-admin active">Dashboard</a>
+            <a href="messages.html" class="nav-link-admin">Messages</a>
+            <a href="videos.html" class="nav-link-admin">Videos</a>
+            <a href="songs.html" class="nav-link-admin">Songs</a>
+            <a href="ebooks.html" class="nav-link-admin">E-Books</a>
+            <a href="links.html" class="nav-link-admin">Links</a>
+            <a href="people.html" class="nav-link-admin">People</a>
+            <a href="radio.html" class="nav-link-admin">Radio</a>
+            <a href="images.html" class="nav-link-admin">Images</a>
+        </div>
+
+        <div class="admin-content">
+            <h2 class="section-title">Welcome to the Admin Panel</h2>
+            
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="number" id="messagesCount">3</div>
+                    <div class="label">Messages</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="videosCount">3</div>
+                    <div class="label">Videos</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="songsCount">3</div>
+                    <div class="label">Songs</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="ebooksCount">2</div>
+                    <div class="label">E-Books</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="linksCount">2</div>
+                    <div class="label">Links</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="peopleCount">0</div>
+                    <div class="label">People</div>
+                </div>
+                <div class="stat-card">
+                    <div class="number" id="imagesCount">0</div>
+                    <div class="label">Images</div>
+                </div>
+            </div>
+
+            <h3 style="margin-top: 40px; margin-bottom: 20px;">Quick Actions</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
+                <a href="messages.html" class="btn btn-primary" style="text-align: center;">Add New Message</a>
+                <a href="videos.html" class="btn btn-primary" style="text-align: center;">Add New Video</a>
+                <a href="songs.html" class="btn btn-primary" style="text-align: center;">Add New Song</a>
+                <a href="ebooks.html" class="btn btn-primary" style="text-align: center;">Add New E-Book</a>
+                <a href="people.html" class="btn btn-primary" style="text-align: center;">Open People Database</a>
+                <a href="images.html" class="btn btn-primary" style="text-align: center;">Upload Images</a>
+            </div>
+
+            <h3 style="margin-top: 40px; margin-bottom: 20px;">Recent Updates</h3>
+            <p style="color: var(--text-light); font-size: 14px;">
+                This admin panel allows you to manage all content displayed on The Metropolitan Church website. 
+                Use the navigation menu above to edit messages, videos, songs, e-books, and links. All changes are saved automatically and will be reflected on the main website immediately.
+            </p>
+
+            <h3 style="margin-top: 30px; margin-bottom: 20px;">Features</h3>
+            <ul style="list-style: none; padding: 0;">
+                <li style="padding: 10px 0; border-bottom: 1px solid var(--border-color);">✓ Add, edit, and delete messages</li>
+                <li style="padding: 10px 0; border-bottom: 1px solid var(--border-color);">✓ Manage video content and links</li>
+                <li style="padding: 10px 0; border-bottom: 1px solid var(--border-color);">✓ Organize worship songs library</li>
+                <li style="padding: 10px 0; border-bottom: 1px solid var(--border-color);">✓ Upload and manage e-books</li>
+                <li style="padding: 10px 0; border-bottom: 1px solid var(--border-color);">✓ Organize resource links</li>
+                <li style="padding: 10px 0; border-bottom: 1px solid var(--border-color);">✓ Store people records in a searchable database table</li>
+                <li style="padding: 10px 0;">✓ Real-time synchronization with main website</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="admin-data.js"></script>
+    <script>
+        // Check if admin is logged in
+        if (!sessionStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+
+        // Update dashboard stats
+        function updateStats() {
+            document.getElementById('messagesCount').textContent = AdminData.getMessages().length;
+            document.getElementById('videosCount').textContent = AdminData.getVideos().length;
+            document.getElementById('songsCount').textContent = AdminData.getSongs().length;
+            document.getElementById('ebooksCount').textContent = AdminData.getEbooks().length;
+            document.getElementById('linksCount').textContent = AdminData.getLinks().length;
+            document.getElementById('peopleCount').textContent = AdminData.getPeople().length;
+            document.getElementById('imagesCount').textContent = AdminData.getAllImages().length;
+        }
+
+        updateStats();
+
+        function logout() {
+            sessionStorage.removeItem('adminLoggedIn');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

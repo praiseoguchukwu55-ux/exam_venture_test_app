@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Messages | Admin</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <div class="admin-header">
+        <div class="container">
+            <div class="header-actions">
+                <div>
+                    <h1>Admin Dashboard</h1>
+                    <p>Manage Messages</p>
+                </div>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="admin-nav">
+            <a href="index.html" class="nav-link-admin">Dashboard</a>
+            <a href="messages.html" class="nav-link-admin active">Messages</a>
+            <a href="videos.html" class="nav-link-admin">Videos</a>
+            <a href="songs.html" class="nav-link-admin">Songs</a>
+            <a href="ebooks.html" class="nav-link-admin">E-Books</a>
+            <a href="links.html" class="nav-link-admin">Links</a>
+            <a href="people.html" class="nav-link-admin">People</a>
+            <a href="radio.html" class="nav-link-admin">Radio</a>
+            <a href="images.html" class="nav-link-admin">Images</a>
+        </div>
+
+        <div class="admin-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2 class="section-title">Messages</h2>
+                <button class="btn btn-primary" onclick="openAddModal()">+ Add New Message</button>
+            </div>
+
+            <div id="alert" class="alert"></div>
+
+            <div class="items-container" id="messagesContainer">
+                <!-- Messages will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="messageModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div class="modal-header">Add New Message</div>
+
+            <form onsubmit="saveMessage(event)">
+                <div class="form-group">
+                    <label for="messageTitle">Title</label>
+                    <input type="text" id="messageTitle" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="messageDescription">Description</label>
+                    <textarea id="messageDescription" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="messageLink">Link (URL)</label>
+                    <input type="text" id="messageLink" placeholder="https://example.com">
+                </div>
+
+                <div class="form-group">
+                    <label>Image (optional)</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button type="button" class="btn btn-secondary" onclick="uploadImageMessage()" style="flex: 1;">Upload New Image</button>
+                        <button type="button" class="btn btn-secondary" onclick="selectImageMessage()" style="flex: 1;">Select from Library</button>
+                    </div>
+                    <div id="messageImagePreview" style="margin-top: 10px; padding: 10px; background: var(--input-bg); border-radius: 4px; min-height: 30px; display: flex; align-items: center; color: var(--text-light); font-size: 14px;">
+                        No image selected
+                    </div>
+                    <input type="hidden" id="messageImage">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Message</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin-data.js"></script>
+    <script>
+        let currentEditId = null;
+
+        // Check if admin is logged in
+        if (!sessionStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+
+        function loadMessages() {
+            const messages = AdminData.getMessages();
+            const container = document.getElementById('messagesContainer');
+            container.innerHTML = '';
+
+            if (messages.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-light);">No messages yet. Click "Add New Message" to create one.</p>';
+                return;
+            }
+
+            messages.forEach(message => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.innerHTML = `
+                    <h3>${escapeHtml(message.title)}</h3>
+                    <p>${escapeHtml(message.description)}</p>
+                    <div class="card-actions">
+                        <button class="btn btn-primary btn-small" onclick="editMessage(${message.id})">Edit</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteMessage(${message.id})">Delete</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openAddModal() {
+            currentEditId = null;
+            document.getElementById('messageModal').querySelector('.modal-header').textContent = 'Add New Message';
+            document.getElementById('messageTitle').value = '';
+            document.getElementById('messageDescription').value = '';
+            document.getElementById('messageLink').value = '';
+            document.getElementById('messageImage').value = '';
+            document.getElementById('messageImagePreview').textContent = 'No image selected';
+            document.getElementById('messageModal').classList.add('show');
+        }
+
+        function editMessage(id) {
+            const messages = AdminData.getMessages();
+            const message = messages.find(m => m.id == id);
+            if (!message) return;
+
+            currentEditId = id;
+            document.getElementById('messageModal').querySelector('.modal-header').textContent = 'Edit Message';
+            document.getElementById('messageTitle').value = message.title;
+            document.getElementById('messageDescription').value = message.description;
+            document.getElementById('messageLink').value = message.link || '';
+            document.getElementById('messageImage').value = message.image || '';
+            
+            if (message.image) {
+                document.getElementById('messageImagePreview').textContent = '✓ Image ID: ' + message.image;
+            } else {
+                document.getElementById('messageImagePreview').textContent = 'No image selected';
+            }
+            document.getElementById('messageModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('messageModal').classList.remove('show');
+        }
+
+        function saveMessage(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('messageTitle').value;
+            const description = document.getElementById('messageDescription').value;
+            const link = document.getElementById('messageLink').value;
+            const image = document.getElementById('messageImage').value;
+
+            const messageData = {
+                title,
+                description,
+                link: link || '#',
+                image: image || ''
+            };
+
+            if (currentEditId) {
+                AdminData.updateMessage(currentEditId, messageData);
+                showAlert('Message updated successfully!', 'success');
+            } else {
+                AdminData.addMessage(messageData);
+                showAlert('Message added successfully!', 'success');
+            }
+
+            closeModal();
+            loadMessages();
+        }
+
+        function deleteMessage(id) {
+            if (confirm('Are you sure you want to delete this message?')) {
+                AdminData.deleteMessage(id);
+                showAlert('Message deleted successfully!', 'success');
+                loadMessages();
+            }
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert show alert-${type}`;
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 4000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function uploadImageMessage() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file');
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Image must be smaller than 5MB');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const imageData = {
+                        id: Date.now().toString(),
+                        name: file.name,
+                        data: event.target.result,
+                        type: file.type,
+                        size: file.size,
+                        category: 'messages',
+                        uploadedAt: new Date().toISOString()
+                    };
+                    
+                    AdminData.addImage(imageData);
+                    document.getElementById('messageImage').value = imageData.id;
+                    document.getElementById('messageImagePreview').textContent = '✓ ' + file.name;
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        }
+
+        function selectImageMessage() {
+            const images = AdminData.getAllImages();
+            if (images.length === 0) {
+                alert('No images uploaded yet. Please upload an image first in the Images section.');
+                return;
+            }
+            
+            const imageList = images.map(img => `${img.id}: ${img.name}`).join('\n');
+            const selectedId = prompt('Enter the Image ID from the Images section:\n\n' + imageList, '');
+            if (selectedId) {
+                const image = AdminData.getImageById(selectedId);
+                if (image) {
+                    document.getElementById('messageImage').value = image.id;
+                    document.getElementById('messageImagePreview').textContent = '✓ Image ID: ' + image.id + ' (' + image.name + ')';
+                } else {
+                    alert('Image ID not found');
+                }
+            }
+        }
+
+        // Load messages on page load
+        loadMessages();
+
+        function logout() {
+            sessionStorage.removeItem('adminLoggedIn');
+            window.location.href = 'login.html';
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('messageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

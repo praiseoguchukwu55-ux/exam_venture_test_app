@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Radio | Admin</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <div class="admin-header">
+        <div class="container">
+            <div class="header-actions">
+                <div>
+                    <h1>Admin Dashboard</h1>
+                    <p>Manage Radio Broadcasts</p>
+                </div>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="admin-nav">
+            <a href="index.html" class="nav-link-admin">Dashboard</a>
+            <a href="messages.html" class="nav-link-admin">Messages</a>
+            <a href="videos.html" class="nav-link-admin">Videos</a>
+            <a href="songs.html" class="nav-link-admin">Songs</a>
+            <a href="ebooks.html" class="nav-link-admin">E-Books</a>
+            <a href="links.html" class="nav-link-admin">Links</a>
+            <a href="people.html" class="nav-link-admin">People</a>
+            <a href="radio.html" class="nav-link-admin active">Radio</a>
+            <a href="images.html" class="nav-link-admin">Images</a>
+        </div>
+
+        <div class="admin-content">
+            <h2 class="section-title">Radio Broadcasts</h2>
+            <p style="color: var(--text-light); margin-bottom: 20px;">Configure your radio broadcast settings below.</p>
+
+            <div id="alert" class="alert"></div>
+
+            <form onsubmit="saveRadioSettings(event)">
+                <div class="form-group">
+                    <label for="radioTitle">Broadcast Title</label>
+                    <input type="text" id="radioTitle" value="Listen Live" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="radioDescription">Description</label>
+                    <textarea id="radioDescription" required>Tune in to our weekly radio broadcast and devotion sessions.</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="radioStreamUrl">Stream URL (for embed code)</label>
+                    <input type="text" id="radioStreamUrl" placeholder="https://stream.example.com/live" value="">
+                </div>
+
+                <div class="form-group">
+                    <label for="radioSchedule">Broadcast Schedule</label>
+                    <textarea id="radioSchedule" placeholder="e.g., Monday-Friday 6:00 AM - 9:00 AM&#10;Sunday 7:00 AM - 10:00 AM">Sunday 10:00 AM
+Monday-Friday 6:00 AM</textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Radio Settings</button>
+                </div>
+            </form>
+
+            <h3 style="margin-top: 40px; margin-bottom: 20px;">Instructions</h3>
+            <ul style="list-style: none; padding: 0;">
+                <li style="padding: 10px 0; border-bottom: 1px solid var(--border-color);">1. Configure the broadcast title and description</li>
+                <li style="padding: 10px 0; border-bottom: 1px solid var(--border-color);">2. Add your stream URL if available</li>
+                <li style="padding: 10px 0; border-bottom: 1px solid var(--border-color);">3. Set the broadcast schedule</li>
+                <li style="padding: 10px 0;">4. Changes will be reflected on the main website immediately</li>
+            </ul>
+        </div>
+    </div>
+
+    <script src="admin-data.js"></script>
+    <script>
+        if (!sessionStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+
+        function loadRadioSettings() {
+            const settings = JSON.parse(localStorage.getItem('tmcRadioSettings') || '{}');
+            document.getElementById('radioTitle').value = settings.title || 'Listen Live';
+            document.getElementById('radioDescription').value = settings.description || 'Tune in to our weekly radio broadcast and devotion sessions.';
+            document.getElementById('radioStreamUrl').value = settings.streamUrl || '';
+            document.getElementById('radioSchedule').value = settings.schedule || '';
+        }
+
+        function saveRadioSettings(event) {
+            event.preventDefault();
+
+            const settings = {
+                title: document.getElementById('radioTitle').value,
+                description: document.getElementById('radioDescription').value,
+                streamUrl: document.getElementById('radioStreamUrl').value,
+                schedule: document.getElementById('radioSchedule').value
+            };
+
+            localStorage.setItem('tmcRadioSettings', JSON.stringify(settings));
+            showAlert('Radio settings saved successfully!', 'success');
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert show alert-${type}`;
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 4000);
+        }
+
+        loadRadioSettings();
+
+        function logout() {
+            sessionStorage.removeItem('adminLoggedIn');
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

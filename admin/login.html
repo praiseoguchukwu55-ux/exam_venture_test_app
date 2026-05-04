@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | The Metropolitan Church</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <style>
+        .login-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #abb400 0%, #f6faf2 100%);
+        }
+
+        .login-box {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .login-box h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .login-box p {
+            text-align: center;
+            color: var(--text-light);
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(168, 178, 17, 0.1);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary-color);
+            color: var(--white);
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .login-info {
+            background-color: #e3f2fd;
+            border-left: 4px solid #1565c0;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #1565c0;
+            line-height: 1.6;
+        }
+
+        .error-message {
+            background-color: #ffebee;
+            color: #c62828;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h1>Admin Panel</h1>
+            <p>The Metropolitan Church</p>
+
+            <div class="error-message" id="errorMessage"></div>
+
+            <form onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <input type="text" id="username" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+
+            <div class="login-info">
+                <strong>Demo Credentials:</strong><br>
+                Username: <code style="background: rgba(0,0,0,0.1); padding: 2px 6px;">admin</code><br>
+                Password: <code style="background: rgba(0,0,0,0.1); padding: 2px 6px;">password</code>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function handleLogin(event) {
+            event.preventDefault();
+
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('errorMessage');
+
+            // Simple authentication (for demo purposes)
+            if (username === 'admin' && password === 'password') {
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                errorDiv.style.display = 'none';
+                window.location.href = 'index.html';
+            } else {
+                errorDiv.textContent = 'Invalid username or password. Please try again.';
+                errorDiv.style.display = 'block';
+            }
+        }
+
+        // Redirect if already logged in
+        if (sessionStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>

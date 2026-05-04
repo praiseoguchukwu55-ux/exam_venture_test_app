@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Links | Admin</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <div class="admin-header">
+        <div class="container">
+            <div class="header-actions">
+                <div>
+                    <h1>Admin Dashboard</h1>
+                    <p>Manage Links</p>
+                </div>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="admin-nav">
+            <a href="index.html" class="nav-link-admin">Dashboard</a>
+            <a href="messages.html" class="nav-link-admin">Messages</a>
+            <a href="videos.html" class="nav-link-admin">Videos</a>
+            <a href="songs.html" class="nav-link-admin">Songs</a>
+            <a href="ebooks.html" class="nav-link-admin">E-Books</a>
+            <a href="links.html" class="nav-link-admin active">Links</a>
+            <a href="people.html" class="nav-link-admin">People</a>
+            <a href="radio.html" class="nav-link-admin">Radio</a>
+            <a href="images.html" class="nav-link-admin">Images</a>
+        </div>
+
+        <div class="admin-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2 class="section-title">Resource Links</h2>
+                <button class="btn btn-primary" onclick="openAddModal()">+ Add New Link</button>
+            </div>
+
+            <div id="alert" class="alert"></div>
+
+            <table class="content-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>URL</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="linksTableBody">
+                    <!-- Links will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="linkModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div class="modal-header">Add New Link</div>
+
+            <form onsubmit="saveLink(event)">
+                <div class="form-group">
+                    <label for="linkTitle">Link Title</label>
+                    <input type="text" id="linkTitle" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="linkUrl">URL</label>
+                    <input type="url" id="linkUrl" placeholder="https://example.com" required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Link</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin-data.js"></script>
+    <script>
+        let currentEditId = null;
+
+        if (!sessionStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+
+        function loadLinks() {
+            const links = AdminData.getLinks();
+            const tableBody = document.getElementById('linksTableBody');
+            tableBody.innerHTML = '';
+
+            if (links.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-light);">No links yet. Click "Add New Link" to create one.</td></tr>';
+                return;
+            }
+
+            links.forEach(link => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${escapeHtml(link.title)}</td>
+                    <td><a href="${escapeHtml(link.url)}" target="_blank" style="color: var(--primary-color); text-decoration: none;">${escapeHtml(link.url)}</a></td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn btn-primary btn-small" onclick="editLink(${link.id})">Edit</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteLink(${link.id})">Delete</button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function openAddModal() {
+            currentEditId = null;
+            document.getElementById('linkModal').querySelector('.modal-header').textContent = 'Add New Link';
+            document.getElementById('linkTitle').value = '';
+            document.getElementById('linkUrl').value = '';
+            document.getElementById('linkModal').classList.add('show');
+        }
+
+        function editLink(id) {
+            const links = AdminData.getLinks();
+            const link = links.find(l => l.id == id);
+            if (!link) return;
+
+            currentEditId = id;
+            document.getElementById('linkModal').querySelector('.modal-header').textContent = 'Edit Link';
+            document.getElementById('linkTitle').value = link.title;
+            document.getElementById('linkUrl').value = link.url;
+            document.getElementById('linkModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('linkModal').classList.remove('show');
+        }
+
+        function saveLink(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('linkTitle').value;
+            const url = document.getElementById('linkUrl').value;
+
+            const linkData = { title, url };
+
+            if (currentEditId) {
+                AdminData.updateLink(currentEditId, linkData);
+                showAlert('Link updated successfully!', 'success');
+            } else {
+                AdminData.addLink(linkData);
+                showAlert('Link added successfully!', 'success');
+            }
+
+            closeModal();
+            loadLinks();
+        }
+
+        function deleteLink(id) {
+            if (confirm('Are you sure you want to delete this link?')) {
+                AdminData.deleteLink(id);
+                showAlert('Link deleted successfully!', 'success');
+                loadLinks();
+            }
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert show alert-${type}`;
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 4000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        loadLinks();
+
+        function logout() {
+            sessionStorage.removeItem('adminLoggedIn');
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('linkModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

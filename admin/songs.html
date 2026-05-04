@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Songs | Admin</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <div class="admin-header">
+        <div class="container">
+            <div class="header-actions">
+                <div>
+                    <h1>Admin Dashboard</h1>
+                    <p>Manage Songs</p>
+                </div>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="admin-nav">
+            <a href="index.html" class="nav-link-admin">Dashboard</a>
+            <a href="messages.html" class="nav-link-admin">Messages</a>
+            <a href="videos.html" class="nav-link-admin">Videos</a>
+            <a href="songs.html" class="nav-link-admin active">Songs</a>
+            <a href="ebooks.html" class="nav-link-admin">E-Books</a>
+            <a href="links.html" class="nav-link-admin">Links</a>
+            <a href="people.html" class="nav-link-admin">People</a>
+            <a href="radio.html" class="nav-link-admin">Radio</a>
+            <a href="images.html" class="nav-link-admin">Images</a>
+        </div>
+
+        <div class="admin-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2 class="section-title">Songs</h2>
+                <button class="btn btn-primary" onclick="openAddModal()">+ Add New Song</button>
+            </div>
+
+            <div id="alert" class="alert"></div>
+
+            <table class="content-table">
+                <thead>
+                    <tr>
+                        <th>Title</th>
+                        <th>Artist</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="songsTableBody">
+                    <!-- Songs will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="songModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div class="modal-header">Add New Song</div>
+
+            <form onsubmit="saveSong(event)">
+                <div class="form-group">
+                    <label for="songTitle">Song Title</label>
+                    <input type="text" id="songTitle" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="songArtist">Artist/Composer</label>
+                    <input type="text" id="songArtist" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="songUrl">Song URL (optional)</label>
+                    <input type="text" id="songUrl" placeholder="https://example.com/song.mp3 or YouTube link">
+                </div>
+
+                <div class="form-group">
+                    <label for="songLyrics">Lyrics (optional)</label>
+                    <textarea id="songLyrics" placeholder="Paste song lyrics here..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Song</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin-data.js"></script>
+    <script>
+        let currentEditId = null;
+
+        if (!sessionStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+
+        function loadSongs() {
+            const songs = AdminData.getSongs();
+            const tableBody = document.getElementById('songsTableBody');
+            tableBody.innerHTML = '';
+
+            if (songs.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="3" style="text-align: center; color: var(--text-light);">No songs yet. Click "Add New Song" to create one.</td></tr>';
+                return;
+            }
+
+            songs.forEach(song => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${escapeHtml(song.title)}</td>
+                    <td>${escapeHtml(song.artist)}</td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn btn-primary btn-small" onclick="editSong(${song.id})">Edit</button>
+                            <button class="btn btn-danger btn-small" onclick="deleteSong(${song.id})">Delete</button>
+                        </div>
+                    </td>
+                `;
+                tableBody.appendChild(row);
+            });
+        }
+
+        function openAddModal() {
+            currentEditId = null;
+            document.getElementById('songModal').querySelector('.modal-header').textContent = 'Add New Song';
+            document.getElementById('songTitle').value = '';
+            document.getElementById('songArtist').value = '';
+            document.getElementById('songUrl').value = '';
+            document.getElementById('songLyrics').value = '';
+            document.getElementById('songModal').classList.add('show');
+        }
+
+        function editSong(id) {
+            const songs = AdminData.getSongs();
+            const song = songs.find(s => s.id == id);
+            if (!song) return;
+
+            currentEditId = id;
+            document.getElementById('songModal').querySelector('.modal-header').textContent = 'Edit Song';
+            document.getElementById('songTitle').value = song.title;
+            document.getElementById('songArtist').value = song.artist;
+            document.getElementById('songUrl').value = song.url || '';
+            document.getElementById('songLyrics').value = song.lyrics || '';
+            document.getElementById('songModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('songModal').classList.remove('show');
+        }
+
+        function saveSong(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('songTitle').value;
+            const artist = document.getElementById('songArtist').value;
+            const url = document.getElementById('songUrl').value;
+            const lyrics = document.getElementById('songLyrics').value;
+
+            const songData = { 
+                title, 
+                artist,
+                url: url || '',
+                lyrics: lyrics || ''
+            };
+
+            if (currentEditId) {
+                AdminData.updateSong(currentEditId, songData);
+                showAlert('Song updated successfully!', 'success');
+            } else {
+                AdminData.addSong(songData);
+                showAlert('Song added successfully!', 'success');
+            }
+
+            closeModal();
+            loadSongs();
+        }
+
+        function deleteSong(id) {
+            if (confirm('Are you sure you want to delete this song?')) {
+                AdminData.deleteSong(id);
+                showAlert('Song deleted successfully!', 'success');
+                loadSongs();
+            }
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert show alert-${type}`;
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 4000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        loadSongs();
+
+        function logout() {
+            sessionStorage.removeItem('adminLoggedIn');
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('songModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>

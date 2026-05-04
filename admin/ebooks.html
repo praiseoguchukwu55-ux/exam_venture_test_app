@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage E-Books | Admin</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <div class="admin-header">
+        <div class="container">
+            <div class="header-actions">
+                <div>
+                    <h1>Admin Dashboard</h1>
+                    <p>Manage E-Books</p>
+                </div>
+                <button class="btn-logout" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="admin-nav">
+            <a href="index.html" class="nav-link-admin">Dashboard</a>
+            <a href="messages.html" class="nav-link-admin">Messages</a>
+            <a href="videos.html" class="nav-link-admin">Videos</a>
+            <a href="songs.html" class="nav-link-admin">Songs</a>
+            <a href="ebooks.html" class="nav-link-admin active">E-Books</a>
+            <a href="links.html" class="nav-link-admin">Links</a>
+            <a href="people.html" class="nav-link-admin">People</a>
+            <a href="radio.html" class="nav-link-admin">Radio</a>
+            <a href="images.html" class="nav-link-admin">Images</a>
+        </div>
+
+        <div class="admin-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+                <h2 class="section-title">E-Books</h2>
+                <button class="btn btn-primary" onclick="openAddModal()">+ Add New E-Book</button>
+            </div>
+
+            <div id="alert" class="alert"></div>
+
+            <div class="items-container" id="ebooksContainer">
+                <!-- E-Books will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Modal -->
+    <div id="ebookModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal()">&times;</span>
+            <div class="modal-header">Add New E-Book</div>
+
+            <form onsubmit="saveEbook(event)">
+                <div class="form-group">
+                    <label for="ebookTitle">Title</label>
+                    <input type="text" id="ebookTitle" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="ebookDescription">Description</label>
+                    <textarea id="ebookDescription" required></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="ebookFileUrl">Download URL (PDF, DOC, etc.)</label>
+                    <input type="text" id="ebookFileUrl" placeholder="https://example.com/file.pdf">
+                </div>
+
+                <div class="form-group">
+                    <label>Cover Image (optional)</label>
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <button type="button" class="btn btn-secondary" onclick="uploadImageEbook()" style="flex: 1;">Upload New Image</button>
+                        <button type="button" class="btn btn-secondary" onclick="selectImageEbook()" style="flex: 1;">Select from Library</button>
+                    </div>
+                    <div id="ebookImagePreview" style="margin-top: 10px; padding: 10px; background: var(--input-bg); border-radius: 4px; min-height: 30px; display: flex; align-items: center; color: var(--text-light); font-size: 14px;">
+                        No image selected
+                    </div>
+                    <input type="hidden" id="ebookImage">
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="admin-data.js"></script>
+    <script>
+        let currentEditId = null;
+
+        if (!sessionStorage.getItem('adminLoggedIn')) {
+            window.location.href = 'login.html';
+        }
+
+        function loadEbooks() {
+            const ebooks = AdminData.getEbooks();
+            const container = document.getElementById('ebooksContainer');
+            container.innerHTML = '';
+
+            if (ebooks.length === 0) {
+                container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-light);">No e-books yet. Click "Add New E-Book" to create one.</p>';
+                return;
+            }
+
+            ebooks.forEach(ebook => {
+                const card = document.createElement('div');
+                card.className = 'item-card';
+                card.innerHTML = `
+                    <h3>${escapeHtml(ebook.title)}</h3>
+                    <p>${escapeHtml(ebook.description)}</p>
+                    <p style="font-size: 12px; color: var(--text-light); margin-top: 8px;">
+                        ${ebook.fileUrl ? '✓ Download link available' : 'No download link'}
+                    </p>
+                    <div class="card-actions">
+                        <button class="btn btn-primary btn-small" onclick="editEbook(${ebook.id})">Edit</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteEbook(${ebook.id})">Delete</button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openAddModal() {
+            currentEditId = null;
+            document.getElementById('ebookModal').querySelector('.modal-header').textContent = 'Add New E-Book';
+            document.getElementById('ebookTitle').value = '';
+            document.getElementById('ebookDescription').value = '';
+            document.getElementById('ebookFileUrl').value = '';
+            document.getElementById('ebookImage').value = '';
+            document.getElementById('ebookImagePreview').textContent = 'No image selected';
+            document.getElementById('ebookModal').classList.add('show');
+        }
+
+        function editEbook(id) {
+            const ebooks = AdminData.getEbooks();
+            const ebook = ebooks.find(e => e.id == id);
+            if (!ebook) return;
+
+            currentEditId = id;
+            document.getElementById('ebookModal').querySelector('.modal-header').textContent = 'Edit E-Book';
+            document.getElementById('ebookTitle').value = ebook.title;
+            document.getElementById('ebookDescription').value = ebook.description;
+            document.getElementById('ebookFileUrl').value = ebook.fileUrl || '';
+            document.getElementById('ebookImage').value = ebook.image || '';
+            
+            if (ebook.image) {
+                document.getElementById('ebookImagePreview').textContent = '✓ Image ID: ' + ebook.image;
+            } else {
+                document.getElementById('ebookImagePreview').textContent = 'No image selected';
+            }
+            document.getElementById('ebookModal').classList.add('show');
+        }
+
+        function closeModal() {
+            document.getElementById('ebookModal').classList.remove('show');
+        }
+
+        function saveEbook(event) {
+            event.preventDefault();
+
+            const title = document.getElementById('ebookTitle').value;
+            const description = document.getElementById('ebookDescription').value;
+            const fileUrl = document.getElementById('ebookFileUrl').value;
+            const image = document.getElementById('ebookImage').value;
+
+            const ebookData = {
+                title,
+                description,
+                fileUrl: fileUrl || '#',
+                image: image || ''
+            };
+
+            if (currentEditId) {
+                AdminData.updateEbook(currentEditId, ebookData);
+                showAlert('E-Book updated successfully!', 'success');
+            } else {
+                AdminData.addEbook(ebookData);
+                showAlert('E-Book added successfully!', 'success');
+            }
+
+            closeModal();
+            loadEbooks();
+        }
+
+        function deleteEbook(id) {
+            if (confirm('Are you sure you want to delete this e-book?')) {
+                AdminData.deleteEbook(id);
+                showAlert('E-Book deleted successfully!', 'success');
+                loadEbooks();
+            }
+        }
+
+        function showAlert(message, type) {
+            const alert = document.getElementById('alert');
+            alert.textContent = message;
+            alert.className = `alert show alert-${type}`;
+            setTimeout(() => {
+                alert.classList.remove('show');
+            }, 4000);
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function uploadImageEbook() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file');
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('Image must be smaller than 5MB');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    const imageData = {
+                        id: Date.now().toString(),
+                        name: file.name,
+                        data: event.target.result,
+                        type: file.type,
+                        size: file.size,
+                        category: 'ebooks',
+                        uploadedAt: new Date().toISOString()
+                    };
+                    
+                    AdminData.addImage(imageData);
+                    document.getElementById('ebookImage').value = imageData.id;
+                    document.getElementById('ebookImagePreview').textContent = '✓ ' + file.name;
+                };
+                reader.readAsDataURL(file);
+            };
+            input.click();
+        }
+
+        function selectImageEbook() {
+            const images = AdminData.getAllImages();
+            if (images.length === 0) {
+                alert('No images uploaded yet. Please upload an image first in the Images section.');
+                return;
+            }
+            
+            const imageList = images.map(img => `${img.id}: ${img.name}`).join('\n');
+            const selectedId = prompt('Enter the Image ID from the Images section:\n\n' + imageList, '');
+            if (selectedId) {
+                const image = AdminData.getImageById(selectedId);
+                if (image) {
+                    document.getElementById('ebookImage').value = image.id;
+                    document.getElementById('ebookImagePreview').textContent = '✓ Image ID: ' + image.id + ' (' + image.name + ')';
+                } else {
+                    alert('Image ID not found');
+                }
+            }
+        }
+
+        loadEbooks();
+
+        function logout() {
+            sessionStorage.removeItem('adminLoggedIn');
+            window.location.href = 'login.html';
+        }
+
+        document.getElementById('ebookModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeModal();
+            }
+        });
+    </script>
+</body>
+</html>
