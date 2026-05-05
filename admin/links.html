@@ -88,8 +88,8 @@
             window.location.href = 'login.html';
         }
 
-        function loadLinks() {
-            const links = AdminData.getLinks();
+        async function loadLinks() {
+            const links = await AdminData.getLinks();
             const tableBody = document.getElementById('linksTableBody');
             tableBody.innerHTML = '';
 
@@ -122,8 +122,8 @@
             document.getElementById('linkModal').classList.add('show');
         }
 
-        function editLink(id) {
-            const links = AdminData.getLinks();
+        async function editLink(id) {
+            const links = await AdminData.getLinks();
             const link = links.find(l => l.id == id);
             if (!link) return;
 
@@ -138,7 +138,7 @@
             document.getElementById('linkModal').classList.remove('show');
         }
 
-        function saveLink(event) {
+        async function saveLink(event) {
             event.preventDefault();
 
             const title = document.getElementById('linkTitle').value;
@@ -146,23 +146,33 @@
 
             const linkData = { title, url };
 
-            if (currentEditId) {
-                AdminData.updateLink(currentEditId, linkData);
-                showAlert('Link updated successfully!', 'success');
-            } else {
-                AdminData.addLink(linkData);
-                showAlert('Link added successfully!', 'success');
-            }
+            try {
+                if (currentEditId) {
+                    await AdminData.updateLink(currentEditId, linkData);
+                    showAlert('Link updated successfully!', 'success');
+                } else {
+                    await AdminData.addLink(linkData);
+                    showAlert('Link added successfully!', 'success');
+                }
 
-            closeModal();
-            loadLinks();
+                closeModal();
+                await loadLinks();
+            } catch (error) {
+                showAlert('Error saving link: ' + (error.message || 'Unknown error'), 'error');
+                console.error('Save error:', error);
+            }
         }
 
-        function deleteLink(id) {
+        async function deleteLink(id) {
             if (confirm('Are you sure you want to delete this link?')) {
-                AdminData.deleteLink(id);
-                showAlert('Link deleted successfully!', 'success');
-                loadLinks();
+                try {
+                    await AdminData.deleteLink(id);
+                    showAlert('Link deleted successfully!', 'success');
+                    await loadLinks();
+                } catch (error) {
+                    showAlert('Error deleting link: ' + (error.message || 'Unknown error'), 'error');
+                    console.error('Delete error:', error);
+                }
             }
         }
 
@@ -181,7 +191,7 @@
             return div.innerHTML;
         }
 
-        loadLinks();
+        loadLinks().catch(error => console.error('Failed to load links:', error));
 
         function logout() {
             sessionStorage.removeItem('adminLoggedIn');

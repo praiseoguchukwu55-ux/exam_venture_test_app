@@ -81,15 +81,15 @@ Monday-Friday 6:00 AM</textarea>
             window.location.href = 'login.html';
         }
 
-        function loadRadioSettings() {
-            const settings = AdminData.getRadioSettings();
+        async function loadRadioSettings() {
+            const settings = await AdminData.getRadioSettings();
             document.getElementById('radioTitle').value = settings.title || 'Listen Live';
             document.getElementById('radioDescription').value = settings.description || 'Tune in to our weekly radio broadcast and devotion sessions.';
             document.getElementById('radioStreamUrl').value = settings.streamUrl || '';
             document.getElementById('radioSchedule').value = settings.schedule || '';
         }
 
-        function saveRadioSettings(event) {
+        async function saveRadioSettings(event) {
             event.preventDefault();
 
             const settings = {
@@ -99,8 +99,13 @@ Monday-Friday 6:00 AM</textarea>
                 schedule: document.getElementById('radioSchedule').value
             };
 
-            AdminData.saveRadioSettings(settings);
-            showAlert('Radio settings saved successfully!', 'success');
+            try {
+                await AdminData.saveRadioSettings(settings);
+                showAlert('Radio settings saved successfully!', 'success');
+            } catch (error) {
+                showAlert('Error saving radio settings: ' + (error.message || 'Unknown error'), 'error');
+                console.error('Save error:', error);
+            }
         }
 
         function showAlert(message, type) {
@@ -112,7 +117,7 @@ Monday-Friday 6:00 AM</textarea>
             }, 4000);
         }
 
-        loadRadioSettings();
+        loadRadioSettings().catch(error => console.error('Failed to load radio settings:', error));
 
         function logout() {
             sessionStorage.removeItem('adminLoggedIn');

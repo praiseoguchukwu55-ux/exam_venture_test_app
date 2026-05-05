@@ -119,8 +119,8 @@
             window.location.href = 'login.html';
         }
 
-        function loadPeople() {
-            const people = AdminData.getPeople();
+        async function loadPeople() {
+            const people = await AdminData.getPeople();
             const tableBody = document.getElementById('peopleTableBody');
             tableBody.innerHTML = '';
 
@@ -163,8 +163,8 @@
             document.getElementById('personModal').classList.add('show');
         }
 
-        function editPerson(id) {
-            const people = AdminData.getPeople();
+        async function editPerson(id) {
+            const people = await AdminData.getPeople();
             const person = people.find(p => p.id == id);
             if (!person) return;
 
@@ -184,7 +184,7 @@
             document.getElementById('personModal').classList.remove('show');
         }
 
-        function savePerson(event) {
+        async function savePerson(event) {
             event.preventDefault();
 
             const personData = {
@@ -197,23 +197,33 @@
                 level: document.getElementById('personLevel').value.trim()
             };
 
-            if (currentEditId) {
-                AdminData.updatePerson(currentEditId, personData);
-                showAlert('Person record updated successfully!', 'success');
-            } else {
-                AdminData.addPerson(personData);
-                showAlert('Person record added successfully!', 'success');
-            }
+            try {
+                if (currentEditId) {
+                    await AdminData.updatePerson(currentEditId, personData);
+                    showAlert('Person record updated successfully!', 'success');
+                } else {
+                    await AdminData.addPerson(personData);
+                    showAlert('Person record added successfully!', 'success');
+                }
 
-            closeModal();
-            loadPeople();
+                closeModal();
+                await loadPeople();
+            } catch (error) {
+                showAlert('Error saving person: ' + (error.message || 'Unknown error'), 'error');
+                console.error('Save error:', error);
+            }
         }
 
-        function deletePerson(id) {
+        async function deletePerson(id) {
             if (confirm('Are you sure you want to delete this person record?')) {
-                AdminData.deletePerson(id);
-                showAlert('Person record deleted successfully!', 'success');
-                loadPeople();
+                try {
+                    await AdminData.deletePerson(id);
+                    showAlert('Person record deleted successfully!', 'success');
+                    await loadPeople();
+                } catch (error) {
+                    showAlert('Error deleting person: ' + (error.message || 'Unknown error'), 'error');
+                    console.error('Delete error:', error);
+                }
             }
         }
 
@@ -232,7 +242,7 @@
             return div.innerHTML;
         }
 
-        loadPeople();
+        loadPeople().catch(error => console.error('Failed to load people:', error));
 
         function logout() {
             sessionStorage.removeItem('adminLoggedIn');

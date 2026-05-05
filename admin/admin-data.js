@@ -1,176 +1,212 @@
 // ============================================
 // Admin Data Management System
-// Uses shared backend API storage
+// Uses shared backend API storage with async/await
 // ============================================
 
-const API_BASE = '/api';
+// Determine API base URL
+// If opened as file://, connect to http://localhost:3000
+// If opened via http, use current host
+const API_BASE = (function() {
+    if (window.location.protocol === 'file:') {
+        // Running from file:// - connect to localhost:3000
+        return 'http://localhost:3000/api';
+    } else {
+        // Running via http - use relative path (same host)
+        return '/api';
+    }
+})();
 
-function requestSync(method, endpoint, body) {
-    const xhr = new XMLHttpRequest();
-    xhr.open(method, `${API_BASE}${endpoint}`, false);
-    xhr.setRequestHeader('Content-Type', 'application/json');
+async function request(method, endpoint, body) {
+    const fullUrl = `${API_BASE}${endpoint}`;
+    const options = {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        mode: 'cors'
+    };
+
+    if (body) {
+        options.body = JSON.stringify(body);
+    }
 
     try {
-        xhr.send(body ? JSON.stringify(body) : null);
-    } catch (error) {
-        throw new Error(`Network error while calling ${endpoint}`);
-    }
+        console.log(`Fetching: ${method} ${fullUrl}`, body ? `with body: ${JSON.stringify(body)}` : '');
+        const response = await fetch(fullUrl, options);
+        console.log(`Response status: ${response.status} for ${fullUrl}`);
 
-    if (xhr.status >= 200 && xhr.status < 300) {
-        if (!xhr.responseText) {
-            return null;
+        if (!response.ok) {
+            const errorText = await response.text();
+            console.error(`Request failed: ${method} ${fullUrl} => Status ${response.status}, Response:`, errorText);
+            throw new Error(`Request to ${endpoint} failed with status ${response.status}: ${errorText}`);
         }
 
-        return JSON.parse(xhr.responseText);
+        const text = await response.text();
+        if (!text) return null;
+
+        try {
+            return JSON.parse(text);
+        } catch (parseError) {
+            console.error(`JSON parse error for response from ${fullUrl}:`, parseError, text);
+            throw new Error(`Invalid JSON response from ${endpoint}`);
+        }
+    } catch (error) {
+        if (error instanceof TypeError) {
+            console.error(`Network/CORS error for ${fullUrl}:`, error.message);
+            throw new Error(`Network error: ${error.message}. Is the server running at ${API_BASE}?`);
+        }
+        console.error(`Error for ${fullUrl}:`, error);
+        throw error;
     }
-
-    throw new Error(`Request to ${endpoint} failed with status ${xhr.status}`);
 }
 
-function getCollection(name) {
-    return requestSync('GET', `/${name}`) || [];
+async function getCollection(name) {
+    return await request('GET', `/${name}`) || [];
 }
 
-function mutateCollection(method, name, body, id) {
+async function mutateCollection(method, name, body, id) {
     const endpoint = id ? `/${name}/${id}` : `/${name}`;
-    return requestSync(method, endpoint, body);
+    return await request(method, endpoint, body);
 }
 
 const AdminData = {
-    init: function() {
-        requestSync('GET', '/health');
+    async init() {
+        try {
+            await request('GET', '/health');
+        } catch (error) {
+            console.error('Admin data init failed:', error);
+        }
     },
 
     // Messages Management
-    getMessages: function() {
-        return getCollection('messages');
+    async getMessages() {
+        return await getCollection('messages');
     },
 
-    addMessage: function(message) {
-        return mutateCollection('POST', 'messages', message);
+    async addMessage(message) {
+        return await mutateCollection('POST', 'messages', message);
     },
 
-    updateMessage: function(id, message) {
-        return mutateCollection('PUT', 'messages', message, id);
+    async updateMessage(id, message) {
+        return await mutateCollection('PUT', 'messages', message, id);
     },
 
-    deleteMessage: function(id) {
-        mutateCollection('DELETE', 'messages', null, id);
+    async deleteMessage(id) {
+        await mutateCollection('DELETE', 'messages', null, id);
     },
 
     // Videos Management
-    getVideos: function() {
-        return getCollection('videos');
+    async getVideos() {
+        return await getCollection('videos');
     },
 
-    addVideo: function(video) {
-        return mutateCollection('POST', 'videos', video);
+    async addVideo(video) {
+        return await mutateCollection('POST', 'videos', video);
     },
 
-    updateVideo: function(id, video) {
-        return mutateCollection('PUT', 'videos', video, id);
+    async updateVideo(id, video) {
+        return await mutateCollection('PUT', 'videos', video, id);
     },
 
-    deleteVideo: function(id) {
-        mutateCollection('DELETE', 'videos', null, id);
+    async deleteVideo(id) {
+        await mutateCollection('DELETE', 'videos', null, id);
     },
 
     // Songs Management
-    getSongs: function() {
-        return getCollection('songs');
+    async getSongs() {
+        return await getCollection('songs');
     },
 
-    addSong: function(song) {
-        return mutateCollection('POST', 'songs', song);
+    async addSong(song) {
+        return await mutateCollection('POST', 'songs', song);
     },
 
-    updateSong: function(id, song) {
-        return mutateCollection('PUT', 'songs', song, id);
+    async updateSong(id, song) {
+        return await mutateCollection('PUT', 'songs', song, id);
     },
 
-    deleteSong: function(id) {
-        mutateCollection('DELETE', 'songs', null, id);
+    async deleteSong(id) {
+        await mutateCollection('DELETE', 'songs', null, id);
     },
 
     // Ebooks Management
-    getEbooks: function() {
-        return getCollection('ebooks');
+    async getEbooks() {
+        return await getCollection('ebooks');
     },
 
-    addEbook: function(ebook) {
-        return mutateCollection('POST', 'ebooks', ebook);
+    async addEbook(ebook) {
+        return await mutateCollection('POST', 'ebooks', ebook);
     },
 
-    updateEbook: function(id, ebook) {
-        return mutateCollection('PUT', 'ebooks', ebook, id);
+    async updateEbook(id, ebook) {
+        return await mutateCollection('PUT', 'ebooks', ebook, id);
     },
 
-    deleteEbook: function(id) {
-        mutateCollection('DELETE', 'ebooks', null, id);
+    async deleteEbook(id) {
+        await mutateCollection('DELETE', 'ebooks', null, id);
     },
 
     // Links Management
-    getLinks: function() {
-        return getCollection('links');
+    async getLinks() {
+        return await getCollection('links');
     },
 
-    addLink: function(link) {
-        return mutateCollection('POST', 'links', link);
+    async addLink(link) {
+        return await mutateCollection('POST', 'links', link);
     },
 
-    updateLink: function(id, link) {
-        return mutateCollection('PUT', 'links', link, id);
+    async updateLink(id, link) {
+        return await mutateCollection('PUT', 'links', link, id);
     },
 
-    deleteLink: function(id) {
-        mutateCollection('DELETE', 'links', null, id);
+    async deleteLink(id) {
+        await mutateCollection('DELETE', 'links', null, id);
     },
 
     // People Records Management
-    getPeople: function() {
-        return getCollection('people');
+    async getPeople() {
+        return await getCollection('people');
     },
 
-    addPerson: function(person) {
-        return mutateCollection('POST', 'people', person);
+    async addPerson(person) {
+        return await mutateCollection('POST', 'people', person);
     },
 
-    updatePerson: function(id, person) {
-        return mutateCollection('PUT', 'people', person, id);
+    async updatePerson(id, person) {
+        return await mutateCollection('PUT', 'people', person, id);
     },
 
-    deletePerson: function(id) {
-        mutateCollection('DELETE', 'people', null, id);
+    async deletePerson(id) {
+        await mutateCollection('DELETE', 'people', null, id);
     },
 
     // Images Management
-    getAllImages: function() {
-        return getCollection('images');
+    async getAllImages() {
+        return await getCollection('images');
     },
 
-    addImage: function(image) {
-        return mutateCollection('POST', 'images', image);
+    async addImage(image) {
+        return await mutateCollection('POST', 'images', image);
     },
 
-    deleteImage: function(id) {
-        mutateCollection('DELETE', 'images', null, id);
+    async deleteImage(id) {
+        await mutateCollection('DELETE', 'images', null, id);
     },
 
-    getImageById: function(id) {
-        return this.getAllImages().find(img => img.id == id);
+    async getImageById(id) {
+        const images = await this.getAllImages();
+        return images.find(img => img.id == id);
     },
 
-    updateImageCategory: function(id, category) {
-        return mutateCollection('PUT', 'images', { category }, id);
+    async updateImageCategory(id, category) {
+        return await mutateCollection('PUT', 'images', { category }, id);
     },
 
     // Radio Settings
-    getRadioSettings: function() {
-        return requestSync('GET', '/radio-settings') || {};
+    async getRadioSettings() {
+        return await request('GET', '/radio-settings') || {};
     },
 
-    saveRadioSettings: function(settings) {
-        return requestSync('PUT', '/radio-settings', settings);
+    async saveRadioSettings(settings) {
+        return await request('PUT', '/radio-settings', settings);
     }
 };
 

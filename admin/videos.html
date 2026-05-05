@@ -74,6 +74,13 @@
                         <button type="button" class="btn btn-secondary" onclick="uploadImageVideo()" style="flex: 1;">Upload New Image</button>
                         <button type="button" class="btn btn-secondary" onclick="selectImageVideo()" style="flex: 1;">Select from Library</button>
                     </div>
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                        <label for="videoImageUrl" style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-secondary); font-size: 13px;">Or paste server image URL:</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="videoImageUrl" placeholder="https://yourserver.com/images/thumbnail.jpg" style="flex: 1;">
+                            <button type="button" class="btn btn-secondary" onclick="setVideoImageUrl()" style="flex: 0 0 auto;">Add URL</button>
+                        </div>
+                    </div>
                     <div id="videoImagePreview" style="margin-top: 10px; padding: 10px; background: var(--input-bg); border-radius: 4px; min-height: 30px; display: flex; align-items: center; color: var(--text-light); font-size: 14px;">
                         No image selected
                     </div>
@@ -96,8 +103,8 @@
             window.location.href = 'login.html';
         }
 
-        function loadVideos() {
-            const videos = AdminData.getVideos();
+        async function loadVideos() {
+            const videos = await AdminData.getVideos();
             const container = document.getElementById('videosContainer');
             container.innerHTML = '';
 
@@ -135,8 +142,8 @@
             document.getElementById('videoModal').classList.add('show');
         }
 
-        function editVideo(id) {
-            const videos = AdminData.getVideos();
+        async function editVideo(id) {
+            const videos = await AdminData.getVideos();
             const video = videos.find(v => v.id == id);
             if (!video) return;
 
@@ -159,7 +166,7 @@
             document.getElementById('videoModal').classList.remove('show');
         }
 
-        function saveVideo(event) {
+        async function saveVideo(event) {
             event.preventDefault();
 
             const title = document.getElementById('videoTitle').value;
@@ -174,23 +181,33 @@
                 image: image || ''
             };
 
-            if (currentEditId) {
-                AdminData.updateVideo(currentEditId, videoData);
-                showAlert('Video updated successfully!', 'success');
-            } else {
-                AdminData.addVideo(videoData);
-                showAlert('Video added successfully!', 'success');
-            }
+            try {
+                if (currentEditId) {
+                    await AdminData.updateVideo(currentEditId, videoData);
+                    showAlert('Video updated successfully!', 'success');
+                } else {
+                    await AdminData.addVideo(videoData);
+                    showAlert('Video added successfully!', 'success');
+                }
 
-            closeModal();
-            loadVideos();
+                closeModal();
+                await loadVideos();
+            } catch (error) {
+                showAlert('Error saving video: ' + (error.message || 'Unknown error'), 'error');
+                console.error('Save error:', error);
+            }
         }
 
-        function deleteVideo(id) {
+        async function deleteVideo(id) {
             if (confirm('Are you sure you want to delete this video?')) {
-                AdminData.deleteVideo(id);
-                showAlert('Video deleted successfully!', 'success');
-                loadVideos();
+                try {
+                    await AdminData.deleteVideo(id);
+                    showAlert('Video deleted successfully!', 'success');
+                    await loadVideos();
+                } catch (error) {
+                    showAlert('Error deleting video: ' + (error.message || 'Unknown error'), 'error');
+                    console.error('Delete error:', error);
+                }
             }
         }
 
@@ -207,6 +224,25 @@
             const div = document.createElement('div');
             div.textContent = text;
             return div.innerHTML;
+        }
+
+        function setVideoImageUrl() {
+            const url = document.getElementById('videoImageUrl').value.trim();
+            if (!url) {
+                alert('Please enter an image URL');
+                return;
+            }
+
+            try {
+                new URL(url);
+            } catch (e) {
+                alert('Please enter a valid URL');
+                return;
+            }
+
+            document.getElementById('videoImage').value = url;
+            document.getElementById('videoImageUrl').value = '';
+            document.getElementById('videoImagePreview').textContent = '✓ Image URL: ' + url;
         }
 
         function uploadImageVideo() {
@@ -265,7 +301,7 @@
             }
         }
 
-        loadVideos();
+        loadVideos().catch(error => console.error('Failed to load videos:', error));
 
         function logout() {
             sessionStorage.removeItem('adminLoggedIn');

@@ -74,6 +74,13 @@
                         <button type="button" class="btn btn-secondary" onclick="uploadImageEbook()" style="flex: 1;">Upload New Image</button>
                         <button type="button" class="btn btn-secondary" onclick="selectImageEbook()" style="flex: 1;">Select from Library</button>
                     </div>
+                    <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                        <label for="ebookImageUrl" style="display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-secondary); font-size: 13px;">Or paste server image URL:</label>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="text" id="ebookImageUrl" placeholder="https://yourserver.com/images/cover.jpg" style="flex: 1;">
+                            <button type="button" class="btn btn-secondary" onclick="setEbookImageUrl()" style="flex: 0 0 auto;">Add URL</button>
+                        </div>
+                    </div>
                     <div id="ebookImagePreview" style="margin-top: 10px; padding: 10px; background: var(--input-bg); border-radius: 4px; min-height: 30px; display: flex; align-items: center; color: var(--text-light); font-size: 14px;">
                         No image selected
                     </div>
@@ -91,8 +98,8 @@
             window.location.href = 'login.html';
         }
 
-        function loadEbooks() {
-            const ebooks = AdminData.getEbooks();
+        async function loadEbooks() {
+            const ebooks = await AdminData.getEbooks();
             const container = document.getElementById('ebooksContainer');
             container.innerHTML = '';
 
@@ -130,8 +137,8 @@
             document.getElementById('ebookModal').classList.add('show');
         }
 
-        function editEbook(id) {
-            const ebooks = AdminData.getEbooks();
+        async function editEbook(id) {
+            const ebooks = await AdminData.getEbooks();
             const ebook = ebooks.find(e => e.id == id);
             if (!ebook) return;
 
@@ -154,7 +161,7 @@
             document.getElementById('ebookModal').classList.remove('show');
         }
 
-        function saveEbook(event) {
+        async function saveEbook(event) {
             event.preventDefault();
 
             const title = document.getElementById('ebookTitle').value;
@@ -169,23 +176,33 @@
                 image: image || ''
             };
 
-            if (currentEditId) {
-                AdminData.updateEbook(currentEditId, ebookData);
-                showAlert('E-Book updated successfully!', 'success');
-            } else {
-                AdminData.addEbook(ebookData);
-                showAlert('E-Book added successfully!', 'success');
-            }
+            try {
+                if (currentEditId) {
+                    await AdminData.updateEbook(currentEditId, ebookData);
+                    showAlert('E-Book updated successfully!', 'success');
+                } else {
+                    await AdminData.addEbook(ebookData);
+                    showAlert('E-Book added successfully!', 'success');
+                }
 
-            closeModal();
-            loadEbooks();
+                closeModal();
+                await loadEbooks();
+            } catch (error) {
+                showAlert('Error saving e-book: ' + (error.message || 'Unknown error'), 'error');
+                console.error('Save error:', error);
+            }
         }
 
-        function deleteEbook(id) {
+        async function deleteEbook(id) {
             if (confirm('Are you sure you want to delete this e-book?')) {
-                AdminData.deleteEbook(id);
-                showAlert('E-Book deleted successfully!', 'success');
-                loadEbooks();
+                try {
+                    await AdminData.deleteEbook(id);
+                    showAlert('E-Book deleted successfully!', 'success');
+                    await loadEbooks();
+                } catch (error) {
+                    showAlert('Error deleting e-book: ' + (error.message || 'Unknown error'), 'error');
+                    console.error('Delete error:', error);
+                }
             }
         }
 
@@ -204,11 +221,30 @@
             return div.innerHTML;
         }
 
-        function uploadImageEbook() {
+        function setEbookImageUrl() {
+            const url = document.getElementById('ebookImageUrl').value.trim();
+            if (!url) {
+                alert('Please enter an image URL');
+                return;
+            }
+
+            try {
+                new URL(url);
+            } catch (e) {
+                alert('Please enter a valid URL');
+                return;
+            }
+
+            document.getElementById('ebookImage').value = url;
+            document.getElementById('ebookImageUrl').value = '';
+            document.getElementById('ebookImagePreview').textContent = '✓ Image URL: ' + url;
+        }
+
+        async function uploadImageEbook() {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
-            input.onchange = (e) => {
+            input.onchange = async (e) => {
                 const file = e.target.files[0];
                 if (!file.type.startsWith('image/')) {
                     alert('Please select an image file');
@@ -220,7 +256,7 @@
                 }
                 
                 const reader = new FileReader();
-                reader.onload = (event) => {
+                reader.onload = async (event) => {
                     const imageData = {
                         id: Date.now().toString(),
                         name: file.name,
@@ -231,7 +267,7 @@
                         uploadedAt: new Date().toISOString()
                     };
                     
-                    AdminData.addImage(imageData);
+                    await AdminData.addImage(imageData);
                     document.getElementById('ebookImage').value = imageData.id;
                     document.getElementById('ebookImagePreview').textContent = '✓ ' + file.name;
                 };
@@ -240,8 +276,8 @@
             input.click();
         }
 
-        function selectImageEbook() {
-            const images = AdminData.getAllImages();
+        async function selectImageEbook() {
+            const images = await AdminData.getAllImages();
             if (images.length === 0) {
                 alert('No images uploaded yet. Please upload an image first in the Images section.');
                 return;
@@ -250,7 +286,7 @@
             const imageList = images.map(img => `${img.id}: ${img.name}`).join('\n');
             const selectedId = prompt('Enter the Image ID from the Images section:\n\n' + imageList, '');
             if (selectedId) {
-                const image = AdminData.getImageById(selectedId);
+                const image = await AdminData.getImageById(selectedId);
                 if (image) {
                     document.getElementById('ebookImage').value = image.id;
                     document.getElementById('ebookImagePreview').textContent = '✓ Image ID: ' + image.id + ' (' + image.name + ')';
@@ -260,7 +296,7 @@
             }
         }
 
-        loadEbooks();
+        loadEbooks().catch(error => console.error('Failed to load ebooks:', error));
 
         function logout() {
             sessionStorage.removeItem('adminLoggedIn');

@@ -4,26 +4,43 @@
 // ============================================
 
 const ContentLoader = {
-    requestSync: function(method, endpoint) {
-        const xhr = new XMLHttpRequest();
-        xhr.open(method, `/api${endpoint}`, false);
-        xhr.setRequestHeader('Content-Type', 'application/json');
-        xhr.send(null);
+    // Use explicit localhost API when the page is opened via file:// so
+    // the public pages still fetch backend data when opened locally.
+    apiBase: (typeof location !== 'undefined' && location.protocol === 'file:') ? 'http://localhost:3000/api' : '/api',
 
-        if (xhr.status >= 200 && xhr.status < 300) {
-            return xhr.responseText ? JSON.parse(xhr.responseText) : null;
+    // Async request method using fetch API
+    async request(method, endpoint) {
+        try {
+            const url = `${this.apiBase}${endpoint}`;
+            const response = await fetch(url, {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                mode: 'cors'
+            });
+
+            if (!response.ok) {
+                console.error(`API Error: ${response.status} ${response.statusText}`);
+                return [];
+            }
+
+            const data = await response.json();
+            return data || [];
+        } catch (error) {
+            console.error(`Failed to fetch ${endpoint}:`, error);
+            return [];
         }
-
-        return null;
     },
 
-    escapeHtml: function(text) {
+    escapeHtml(text) {
+        if (!text) return '';
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     },
 
-    getBackgroundStyle: function(imageField, imageMap) {
+    getBackgroundStyle(imageField, imageMap) {
         if (!imageField) {
             return 'linear-gradient(135deg, #abb400 0%, #ffffff 100%)';
         }
@@ -31,6 +48,16 @@ const ContentLoader = {
         if (String(imageField).match(/^\d+$/) && imageMap) {
             const image = imageMap.get(String(imageField));
             if (image && image.data) {
+                // Handle Google Drive links
+                if (image.type === 'google-drive-link' && image.data.includes('drive.google.com')) {
+                    // Convert Google Drive sharing link to direct image URL
+                    const fileIdMatch = image.data.match(/\/d\/([^\/]+)/);
+                    if (fileIdMatch && fileIdMatch[1]) {
+                        const fileId = fileIdMatch[1];
+                        return `url('https://drive.google.com/thumbnail?sz=w500&id=${fileId}')`;
+                    }
+                }
+                // Handle regular data URIs
                 return `url('${image.data}')`;
             }
         }
@@ -38,111 +65,151 @@ const ContentLoader = {
         return imageField;
     },
 
-    loadMessages: function(containerId) {
-        const messages = this.requestSync('GET', '/messages') || [];
-        const images = this.requestSync('GET', '/images') || [];
+    async loadMessages(containerId) {
+        const messages = await this.request('GET', '/messages');
+        const images = await this.request('GET', '/images');
         const imageMap = new Map(images.map(image => [String(image.id), image]));
         const container = document.getElementById(containerId);
 
-        if (!container || messages.length === 0) return;
+        if (!container) return;
 
         container.innerHTML = '';
 
+        if (messages.length === 0) {
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">No messages available yet.</p>';
+            return;
+        }
+
         messages.forEach(message => {
-            const card = document.createElement('div');
-            card.className = 'media-card';
             const bgStyle = this.getBackgroundStyle(message.image, imageMap);
             const styleStr = bgStyle.startsWith('url(')
                 ? `background: ${bgStyle}; background-size: cover; background-position: center;`
                 : `background: ${bgStyle}`;
 
-            card.innerHTML = `
+            const link = document.createElement('a');
+            link.href = message.link || '#';
+            link.style.textDecoration = 'none';
+            link.style.color = 'inherit';
+            link.className = 'media-card';
+            link.innerHTML = `
                 <div class="media-image" style="${styleStr}"></div>
                 <h3>${this.escapeHtml(message.title)}</h3>
                 <p>${this.escapeHtml(message.description)}</p>
-                <a href="${message.link || '#'}" class="card-link">Explore →</a>
+                <span class="card-link">Explore →</span>
             `;
-            container.appendChild(card);
+            container.appendChild(link);
         });
     },
 
-    loadVideos: function(containerId) {
-        const videos = this.requestSync('GET', '/videos') || [];
+    async loadVideos(containerId) {
+        const videos = await this.request('GET', '/videos');
         const container = document.getElementById(containerId);
 
-        if (!container || videos.length === 0) return;
+        if (!container) return;
 
         container.innerHTML = '';
 
+        if (videos.length === 0) {
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">No videos available yet.</p>';
+            return;
+        }
+
         videos.forEach(video => {
-            const card = document.createElement('div');
-            card.className = 'video-card';
-            card.innerHTML = `
+            const link = document.createElement('a');
+            link.href = video.url || '#';
+            link.target = video.url ? '_blank' : '';
+            link.style.textDecoration = 'none';
+            link.style.color = 'inherit';
+            link.className = 'video-card';
+            link.innerHTML = `
                 <div class="video-thumbnail"></div>
                 <h3>${this.escapeHtml(video.title)}</h3>
                 <p>${this.escapeHtml(video.description)}</p>
+                <span class="card-link">Watch →</span>
             `;
-            container.appendChild(card);
+            container.appendChild(link);
         });
     },
 
-    loadSongs: function(containerId) {
-        const songs = this.requestSync('GET', '/songs') || [];
+    async loadSongs(containerId) {
+        const songs = await this.request('GET', '/songs');
         const container = document.getElementById(containerId);
 
-        if (!container || songs.length === 0) return;
+        if (!container) return;
 
         container.innerHTML = '';
 
+        if (songs.length === 0) {
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">No songs available yet.</p>';
+            return;
+        }
+
         songs.forEach(song => {
-            const item = document.createElement('div');
-            item.className = 'song-item';
-            const songLink = song.url ? `<a href="${this.escapeHtml(song.url)}" target="_blank" class="song-link">▶ Listen</a>` : '';
-            item.innerHTML = `
+            const link = document.createElement('a');
+            link.href = song.url || '#';
+            link.target = song.url ? '_blank' : '';
+            link.style.textDecoration = 'none';
+            link.style.color = 'inherit';
+            link.className = 'song-item';
+            link.innerHTML = `
                 <div class="song-cover"></div>
                 <h4>${this.escapeHtml(song.title)}</h4>
-                <p>${this.escapeHtml(song.artist)}</p>
-                ${songLink}
+                <p>${this.escapeHtml(song.artist || 'Unknown Artist')}</p>
+                <span class="song-link">▶ Listen</span>
             `;
-            container.appendChild(item);
+            container.appendChild(link);
         });
     },
 
-    loadEbooks: function(containerId) {
-        const ebooks = this.requestSync('GET', '/ebooks') || [];
-        const images = this.requestSync('GET', '/images') || [];
+    async loadEbooks(containerId) {
+        const ebooks = await this.request('GET', '/ebooks');
+        const images = await this.request('GET', '/images');
         const imageMap = new Map(images.map(image => [String(image.id), image]));
         const container = document.getElementById(containerId);
 
-        if (!container || ebooks.length === 0) return;
+        if (!container) return;
 
         container.innerHTML = '';
 
+        if (ebooks.length === 0) {
+            container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: #999;">No e-books available yet.</p>';
+            return;
+        }
+
         ebooks.forEach(ebook => {
-            const card = document.createElement('div');
-            card.className = 'ebook-card';
             const bgStyle = this.getBackgroundStyle(ebook.image, imageMap);
             const styleStr = bgStyle.startsWith('url(')
                 ? `background: ${bgStyle}; background-size: cover; background-position: center;`
                 : `background: ${bgStyle}`;
 
-            card.innerHTML = `
+            const link = document.createElement('a');
+            link.href = (ebook.fileUrl && ebook.fileUrl !== '#') ? ebook.fileUrl : '#';
+            link.target = (ebook.fileUrl && ebook.fileUrl !== '#') ? '_blank' : '';
+            link.style.textDecoration = 'none';
+            link.style.color = 'inherit';
+            link.className = 'ebook-card';
+            link.innerHTML = `
                 <div class="ebook-cover" style="${styleStr}"></div>
                 <h3>${this.escapeHtml(ebook.title)}</h3>
                 <p>${this.escapeHtml(ebook.description)}</p>
-                <a href="${ebook.fileUrl || '#'}" class="download-btn" target="_blank">Download →</a>
+                ${ebook.fileUrl && ebook.fileUrl !== '#' ? `<span class="download-btn">Download →</span>` : '<span class="download-btn" style="opacity: 0.5;">Coming Soon</span>'}
             `;
-            container.appendChild(card);
+            container.appendChild(link);
         });
     },
 
-    loadLinks: function(containerId) {
-        const links = this.requestSync('GET', '/links') || [];
+    async loadLinks(containerId) {
+        const links = await this.request('GET', '/links');
         const container = document.getElementById(containerId);
 
-        if (!container || links.length === 0) return;
+        if (!container) return;
 
         container.innerHTML = '';
+
+        if (links.length === 0) {
+            container.innerHTML = '<p style="text-align: center; color: #999;">No links available yet.</p>';
+            return;
+        }
 
         const linksList = document.createElement('ul');
         linksList.style.listStyle = 'none';
@@ -163,15 +230,15 @@ const ContentLoader = {
         container.appendChild(linksList);
     },
 
-    loadRadioSettings: function() {
-        const settings = this.requestSync('GET', '/radio-settings') || {};
+    async loadRadioSettings() {
+        const settings = await this.request('GET', '/radio-settings');
 
-        if (settings.title) {
+        if (settings && settings.title) {
             const titleEl = document.querySelector('.radio-player h3');
             if (titleEl) titleEl.textContent = settings.title;
         }
 
-        if (settings.description) {
+        if (settings && settings.description) {
             const descEl = document.querySelector('.radio-player p');
             if (descEl) descEl.textContent = settings.description;
         }
@@ -179,20 +246,29 @@ const ContentLoader = {
 };
 
 // Initialize content loading on page load
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+    // Load messages on home page
     if (document.getElementById('mediaGrid') && document.title.includes('Metropolitan Church, Ibadan')) {
-        ContentLoader.loadMessages('mediaGrid');
-    } else if (document.title.includes('Videos')) {
-        ContentLoader.loadVideos('mediaGrid');
-    } else if (document.title.includes('Songs')) {
-        ContentLoader.loadSongs('songsGrid');
-    } else if (document.title.includes('Books') || document.title.includes('Ebooks')) {
-        ContentLoader.loadEbooks('ebooksGrid');
-    } else if (document.title.includes('Links')) {
-        ContentLoader.loadLinks('linksContent');
+        await ContentLoader.loadMessages('mediaGrid');
     }
-
+    // Load videos
+    if (document.title.includes('Videos')) {
+        await ContentLoader.loadVideos('mediaGrid');
+    }
+    // Load songs
+    if (document.title.includes('Songs')) {
+        await ContentLoader.loadSongs('songsGrid');
+    }
+    // Load ebooks
+    if (document.title.includes('Books') || document.title.includes('Ebooks')) {
+        await ContentLoader.loadEbooks('ebooksGrid');
+    }
+    // Load links
+    if (document.title.includes('Links')) {
+        await ContentLoader.loadLinks('linksContent');
+    }
+    // Load radio settings if radio player exists
     if (document.querySelector('.radio-player')) {
-        ContentLoader.loadRadioSettings();
+        await ContentLoader.loadRadioSettings();
     }
 });

@@ -98,8 +98,8 @@
             window.location.href = 'login.html';
         }
 
-        function loadSongs() {
-            const songs = AdminData.getSongs();
+        async function loadSongs() {
+            const songs = await AdminData.getSongs();
             const tableBody = document.getElementById('songsTableBody');
             tableBody.innerHTML = '';
 
@@ -134,8 +134,8 @@
             document.getElementById('songModal').classList.add('show');
         }
 
-        function editSong(id) {
-            const songs = AdminData.getSongs();
+        async function editSong(id) {
+            const songs = await AdminData.getSongs();
             const song = songs.find(s => s.id == id);
             if (!song) return;
 
@@ -152,7 +152,7 @@
             document.getElementById('songModal').classList.remove('show');
         }
 
-        function saveSong(event) {
+        async function saveSong(event) {
             event.preventDefault();
 
             const title = document.getElementById('songTitle').value;
@@ -167,23 +167,33 @@
                 lyrics: lyrics || ''
             };
 
-            if (currentEditId) {
-                AdminData.updateSong(currentEditId, songData);
-                showAlert('Song updated successfully!', 'success');
-            } else {
-                AdminData.addSong(songData);
-                showAlert('Song added successfully!', 'success');
-            }
+            try {
+                if (currentEditId) {
+                    await AdminData.updateSong(currentEditId, songData);
+                    showAlert('Song updated successfully!', 'success');
+                } else {
+                    await AdminData.addSong(songData);
+                    showAlert('Song added successfully!', 'success');
+                }
 
-            closeModal();
-            loadSongs();
+                closeModal();
+                await loadSongs();
+            } catch (error) {
+                showAlert('Error saving song: ' + (error.message || 'Unknown error'), 'error');
+                console.error('Save error:', error);
+            }
         }
 
-        function deleteSong(id) {
+        async function deleteSong(id) {
             if (confirm('Are you sure you want to delete this song?')) {
-                AdminData.deleteSong(id);
-                showAlert('Song deleted successfully!', 'success');
-                loadSongs();
+                try {
+                    await AdminData.deleteSong(id);
+                    showAlert('Song deleted successfully!', 'success');
+                    await loadSongs();
+                } catch (error) {
+                    showAlert('Error deleting song: ' + (error.message || 'Unknown error'), 'error');
+                    console.error('Delete error:', error);
+                }
             }
         }
 
@@ -202,7 +212,7 @@
             return div.innerHTML;
         }
 
-        loadSongs();
+        loadSongs().catch(error => console.error('Failed to load songs:', error));
 
         function logout() {
             sessionStorage.removeItem('adminLoggedIn');

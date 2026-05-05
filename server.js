@@ -143,7 +143,7 @@ function getCollectionName(pathname) {
     return null;
   }
 
-  return parts.slice(1).join('/');
+  return parts[1];
 }
 
 function getCollection(store, name) {
@@ -325,6 +325,18 @@ ensureStore();
 const server = http.createServer(async (req, res) => {
   const requestUrl = new URL(req.url, `http://${req.headers.host}`);
   const pathname = requestUrl.pathname;
+
+  // Add CORS headers to allow requests from file:// and any origin
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    res.writeHead(200);
+    res.end();
+    return;
+  }
 
   if (pathname.startsWith('/api/')) {
     try {
