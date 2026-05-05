@@ -4,14 +4,45 @@
 // ============================================
 
 const ContentLoader = {
-    // Use explicit localhost API when the page is opened via file:// so
-    // the public pages still fetch backend data when opened locally.
-    apiBase: (typeof location !== 'undefined' && location.protocol === 'file:') ? 'http://localhost:3000/api' : '/api',
+    apiBaseCache: null,
+
+    async getApiBase() {
+        if (this.apiBaseCache) {
+            return this.apiBaseCache;
+        }
+
+        if (typeof location !== 'undefined' && location.protocol === 'file:') {
+            this.apiBaseCache = 'http://localhost:3000/api';
+            return this.apiBaseCache;
+        }
+
+        if (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) {
+            this.apiBaseCache = window.APP_CONFIG.API_BASE_URL;
+            return this.apiBaseCache;
+        }
+
+        try {
+            const response = await fetch('/config.json', { cache: 'no-store' });
+            if (response.ok) {
+                const config = await response.json();
+                if (config && config.API_BASE_URL) {
+                    this.apiBaseCache = config.API_BASE_URL;
+                    return this.apiBaseCache;
+                }
+            }
+        } catch (error) {
+            console.warn('Could not load config.json, falling back to same-origin API:', error);
+        }
+
+        this.apiBaseCache = '/api';
+        return this.apiBaseCache;
+    },
 
     // Async request method using fetch API
     async request(method, endpoint) {
         try {
-            const url = `${this.apiBase}${endpoint}`;
+            const apiBase = await this.getApiBase();
+            const url = `${apiBase}${endpoint}`;
             const response = await fetch(url, {
                 method: method,
                 headers: {
@@ -66,8 +97,17 @@ const ContentLoader = {
     },
 
     async loadMessages(containerId) {
-        const messages = await this.request('GET', '/messages');
+        const fetched = await this.request('GET', '/messages');
         const images = await this.request('GET', '/images');
+        // Hardcoded announcement so it shows on the public site in any browser
+        const hardcoded = {
+            id: 'hc-1',
+            title: "Announcement: Today's Message Uploaded",
+            description: "Good evening Pastor Sir\nGood evening Family @all\n\nThank you Pastor Sir for the privilege of posting this announcement.\n\nToday's message has been uploaded. Let's listen again and be blessed.\n\nThank you family.",
+            link: 'https://drive.google.com/file/d/14pR2lNm9T6oz64VA3U4T-7eFbFuMnzoK/view?usp=drivesdk',
+            image: ''
+        };
+        const messages = [hardcoded].concat(fetched || []);
         const imageMap = new Map(images.map(image => [String(image.id), image]));
         const container = document.getElementById(containerId);
 

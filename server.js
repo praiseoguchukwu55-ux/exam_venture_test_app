@@ -4,8 +4,8 @@ const path = require('path');
 const { URL } = require('url');
 
 const rootDir = __dirname;
-const dataDir = path.join(rootDir, 'data');
-const storePath = path.join(dataDir, 'store.json');
+const dataDir = process.env.DATA_DIR ? path.resolve(process.env.DATA_DIR) : path.join(rootDir, 'data');
+const storePath = process.env.STORE_PATH ? path.resolve(process.env.STORE_PATH) : path.join(dataDir, 'store.json');
 const port = Number(process.env.PORT || 3000);
 
 const mimeTypes = {

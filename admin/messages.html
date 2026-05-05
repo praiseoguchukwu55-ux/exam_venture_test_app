@@ -105,9 +105,21 @@
         }
 
         async function loadMessages() {
-            const messages = await AdminData.getMessages();
+            const fetched = await AdminData.getMessages();
             const container = document.getElementById('messagesContainer');
             container.innerHTML = '';
+
+            // Hardcoded announcement to show at the top of the Admin Messages tab
+            const hardcoded = {
+                id: 'hc-1',
+                title: "Announcement: Today's Message Uploaded",
+                description: `Good evening Pastor Sir\nGood evening Family @all\n\nThank you Pastor Sir for the privilege of posting this announcement.\n\nToday's message has been uploaded. Let's listen again and be blessed.\n\nThank you family.`,
+                link: 'https://drive.google.com/file/d/14pR2lNm9T6oz64VA3U4T-7eFbFuMnzoK/view?usp=drivesdk',
+                image: ''
+            };
+
+            // Merge hardcoded message with fetched messages (hardcoded appears first)
+            const messages = [hardcoded].concat(fetched || []);
 
             if (messages.length === 0) {
                 container.innerHTML = '<p style="grid-column: 1/-1; text-align: center; color: var(--text-light);">No messages yet. Click "Add New Message" to create one.</p>';
@@ -117,13 +129,22 @@
             messages.forEach(message => {
                 const card = document.createElement('div');
                 card.className = 'item-card';
+
+                // If this is the hardcoded message, don't show edit/delete (it's static)
+                let actionsHtml = '';
+                if (String(message.id).startsWith('hc-')) {
+                    actionsHtml = `<a class="btn btn-secondary btn-small" href="${escapeHtml(message.link || '#')}" target="_blank">Open</a>`;
+                } else {
+                    actionsHtml = `
+                        <button class="btn btn-primary btn-small" onclick="editMessage(${message.id})">Edit</button>
+                        <button class="btn btn-danger btn-small" onclick="deleteMessage(${message.id})">Delete</button>
+                    `;
+                }
+
                 card.innerHTML = `
                     <h3>${escapeHtml(message.title)}</h3>
                     <p>${escapeHtml(message.description)}</p>
-                    <div class="card-actions">
-                        <button class="btn btn-primary btn-small" onclick="editMessage(${message.id})">Edit</button>
-                        <button class="btn btn-danger btn-small" onclick="deleteMessage(${message.id})">Delete</button>
-                    </div>
+                    <div class="card-actions">${actionsHtml}</div>
                 `;
                 container.appendChild(card);
             });

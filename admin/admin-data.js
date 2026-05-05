@@ -3,21 +3,48 @@
 // Uses shared backend API storage with async/await
 // ============================================
 
-// Determine API base URL
-// If opened as file://, connect to http://localhost:3000
-// If opened via http, use current host
-const API_BASE = (function() {
-    if (window.location.protocol === 'file:') {
-        // Running from file:// - connect to localhost:3000
-        return 'http://localhost:3000/api';
-    } else {
-        // Running via http - use relative path (same host)
-        return '/api';
+// Determine API base URL.
+// Priority:
+// 1. file:// local dev -> localhost backend
+// 2. config.json / runtime config -> Render backend
+// 3. same-origin http hosting -> relative /api
+let API_BASE_CACHE = null;
+
+async function getApiBase() {
+    if (API_BASE_CACHE) {
+        return API_BASE_CACHE;
     }
-})();
+
+    if (window.location.protocol === 'file:') {
+        API_BASE_CACHE = 'http://localhost:3000/api';
+        return API_BASE_CACHE;
+    }
+
+    if (window.APP_CONFIG && window.APP_CONFIG.API_BASE_URL) {
+        API_BASE_CACHE = window.APP_CONFIG.API_BASE_URL;
+        return API_BASE_CACHE;
+    }
+
+    try {
+        const response = await fetch('/config.json', { cache: 'no-store' });
+        if (response.ok) {
+            const config = await response.json();
+            if (config && config.API_BASE_URL) {
+                API_BASE_CACHE = config.API_BASE_URL;
+                return API_BASE_CACHE;
+            }
+        }
+    } catch (error) {
+        console.warn('Could not load config.json, falling back to same-origin API:', error);
+    }
+
+    API_BASE_CACHE = '/api';
+    return API_BASE_CACHE;
+}
 
 async function request(method, endpoint, body) {
-    const fullUrl = `${API_BASE}${endpoint}`;
+    const apiBase = await getApiBase();
+    const fullUrl = `${apiBase}${endpoint}`;
     const options = {
         method,
         headers: { 'Content-Type': 'application/json' },
@@ -51,7 +78,7 @@ async function request(method, endpoint, body) {
     } catch (error) {
         if (error instanceof TypeError) {
             console.error(`Network/CORS error for ${fullUrl}:`, error.message);
-            throw new Error(`Network error: ${error.message}. Is the server running at ${API_BASE}?`);
+            throw new Error(`Network error: ${error.message}. Is the server running at ${apiBase}?`);
         }
         console.error(`Error for ${fullUrl}:`, error);
         throw error;
