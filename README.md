@@ -1,170 +1,44 @@
 # The Metropolitan Church, Ibadan - Website
 
-A modern, responsive website for The Metropolitan Church, Ibadan. Built with HTML5, CSS3, vanilla JavaScript, and a lightweight Node backend for shared content storage.
-
-## Features
-
-- **Responsive Design** - Works beautifully on desktop, tablet, and mobile devices
-- **Modern UI** - Clean, professional design with pink/magenta accent colors
-- **Navigation Menu** - Sticky navigation with dropdown support
-- **Content Sections**:
-  - Teachings & Gospel Messages
-  - Radio Broadcasts
-  - Videos
-  - Worship Songs
-  - E-Books & Resources
-  - Contact Information
-- **Interactive Elements**:
-  - Mobile hamburger menu
-  - Smooth scrolling navigation
-  - Radio player controls
-  - Contact form
-  - Social media links
-- **Shared Content API** - Admin changes are saved on the server and shown to all visitors
-- **Accessibility** - Semantic HTML and keyboard navigation support
+This is now a fully static website built with HTML, CSS, and vanilla JavaScript.
 
 ## Project Structure
 
 ```
 TMC Church/
-├── index.html      - Main website HTML
-├── styles.css      - Styling and responsive design
-├── script.js       - Interactive functionality
-├── server.js       - Node server and API
-├── package.json    - Start script for deployment
-├── data/store.json - Persistent shared content store
-└── README.md       - Documentation (this file)
+├── index.html
+├── radio.html
+├── videos.html
+├── songs.html
+├── ebooks.html
+├── links.html
+├── contact.html
+├── styles.css
+├── script.js
+├── logo.png
+└── README.md
 ```
 
-## Getting Started
+## Run the Website
 
-### Quick Start
+Open `index.html` directly in any browser.
 
-1. **Start the server**
-   - Run `npm start`
-   - Open `http://localhost:3000`
+No Node.js server, admin panel, or API is required.
 
-2. **Live Development** (Optional - Using VS Code)
-   - Install the "Live Server" extension in VS Code
-   - For the shared data flow, use the Node server instead of opening the HTML file directly
+## Editing Content
 
-### System Requirements
+- Update page content directly in the HTML files.
+- Update styling in `styles.css`.
+- Update interactions in `script.js`.
 
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-- Node.js 18+ for the backend server
+## Browser Support
 
-## Customization Guide
-
-### Update Church Information
-
-Edit the following in `index.html`:
-
-- **Church Name & Location**: Update the logo circle text and hero section
-- **Contact Details**: Section #contact - add phone, email, service times
-- **Media Content**: Replace placeholder titles and descriptions
-- **Social Links**: Update footer social media links
-
-### Modify Colors & Branding
-
-Edit the CSS variables in `styles.css` (top of file):
-
-```css
-:root {
-    --primary-color: #e91e63;      /* Pink/Magenta */
-    --primary-dark: #c2185b;       /* Darker shade */
-    --dark-bg: #1a1a1a;            /* Navigation background */
-    --light-bg: #f5f5f5;           /* Light sections */
-    --text-dark: #333;             /* Main text */
-    --text-light: #666;            /* Secondary text */
-}
-```
-
-### Add Your Content
-
-1. **Teachings Section** - Replace placeholder cards with actual teachings
-2. **Media Grid** - Update titles, descriptions, and links
-3. **Contact Information** - Add real phone, email, address, service times
-4. **Footer** - Customize "About Us" text and social media handles
-5. **Admin Panel** - Content saved from the admin area updates the shared JSON store
-
-### Add Images
-
-To add church photos, logos, or media thumbnails:
-
-1. Create an `images/` folder in the project
-2. Add your images there
-3. Reference them in HTML, e.g.:
-   ```html
-   <img src="images/church-photo.jpg" alt="Church">
-   ```
-
-## Features Explained
-
-### Navigation
-- **Sticky header** - Stays visible when scrolling
-- **Mobile menu** - Hamburger toggle on screens under 768px
-- **Dropdown links** - "LINKS" menu has sub-items
-
-### Sections
-
-1. **Hero** - Welcome banner with call-to-action button
-2. **Teachings** - Featured teaching cards with gradient backgrounds
-3. **Radio** - Audio player interface with volume control
-4. **Videos** - Video thumbnail grid with play indicators
-5. **Songs** - Worship song cards with album covers
-6. **E-Books** - Downloadable resource cards
-7. **Contact** - Map-ready location, contact details, and message form
-8. **Footer** - Links, social icons, and copyright
-
-## Browser Compatibility
-
-- ✅ Chrome/Chromium (Latest)
-- ✅ Firefox (Latest)
-- ✅ Safari (Latest)
-- ✅ Edge (Latest)
-- ✅ Mobile browsers (iOS Safari, Chrome Mobile)
-
-## Performance
-
-- **Lightweight** - No frameworks or large dependencies
-- **Fast Loading** - Optimized CSS and vanilla JavaScript
-- **Mobile Optimized** - Responsive images and touch-friendly
-- **SEO Friendly** - Semantic HTML structure
-
-## Next Steps
-
-1. **Personalize Content** - Add church-specific teachings, contact info, images
-2. **Connect Services** - Link radio broadcasts, video platforms (YouTube)
-3. **Email Integration** - Connect contact form to email service
-4. **Domain Setup** - Deploy to web hosting and custom domain
-5. **Analytics** - Add Google Analytics for traffic tracking
-6. **Social Media** - Link to church social media accounts
-
-## Development Tips
-
-### Adding New Content
-- Keep titles concise and descriptive
-- Use the existing card layouts for consistency
-- Test on mobile devices frequently
-
-### Improving SEO
-- Update meta tags in `<head>` of index.html
-- Add meaningful image alt text
-- Use descriptive link text
-
-### Mobile Testing
-- Use browser DevTools (F12) → Toggle Device Toolbar
-- Test on actual phones if possible
-- Verify all interactive elements work on touch
-
-## Support & Credits
-
-Created with HTML5, CSS3, and JavaScript - no external dependencies.
-
-Designed for The Metropolitan Church, Ibadan, Nigeria.
+- Chrome/Chromium
+- Firefox
+- Safari
+- Edge
+- Mobile browsers
 
 ---
 
-**Version:** 1.0  
-**Last Updated:** May 2026  
-**Status:** Ready for Customization
+Last updated: May 2026
