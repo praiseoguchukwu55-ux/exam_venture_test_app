@@ -280,3 +280,15 @@ if (searchInput && searchBtn) {
 }
 
 console.log('Church website loaded successfully!');
+
+// Toggle a series' volume list (called from inline buttons)
+function toggleSeries(seriesId) {
+    const list = document.getElementById(seriesId + '-volumes');
+    if (!list) return;
+    if (list.style.display === 'none' || list.style.display === '') {
+        list.style.display = 'block';
+        list.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        list.style.display = 'none';
+    }
+}

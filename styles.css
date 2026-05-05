@@ -819,6 +819,50 @@ body {
     transition: transform 0.2s ease, background-color 0.3s ease, color 0.3s ease;
 }
 
+/* ============================================
+   Series / Volumes UI
+   ============================================ */
+.series-card .card-actions {
+    padding: 12px 20px 18px;
+}
+
+.series-card .btn {
+    background: var(--primary-color);
+    color: var(--white);
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.series-card .btn:hover {
+    background: var(--primary-dark);
+}
+
+.volume-list {
+    background: linear-gradient(180deg, rgba(171,180,0,0.04), rgba(255,255,255,0.02));
+    border: 1px solid var(--surface-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+
+.volume-list ul li a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.volume-list ul li strong {
+    color: var(--text-primary);
+    margin-right: 6px;
+}
+
+@media (max-width: 640px) {
+    .volume-list ul li { padding: 10px 0; }
+    .media-image { height: 160px; }
+}
+
 .theme-toggle:hover {
     transform: translateY(-1px);
 }
