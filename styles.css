@@ -375,35 +375,42 @@ body {
 }
 
 .media-card {
-    background: var(--card-bg);
-    border: 1px solid rgba(171, 180, 0, 0.18);
-    border-radius: var(--radius-md);
+    background: linear-gradient(180deg, var(--card-bg) 0%, rgba(255,255,255,0.02) 100%);
+    border: 1px solid rgba(16,20,12,0.06);
+    border-radius: 14px;
     overflow: hidden;
-    box-shadow: var(--shadow-soft);
-    transition: all 0.3s ease;
-    cursor: pointer;
+    box-shadow: 0 8px 22px rgba(16,20,12,0.06);
+    transition: transform 0.28s cubic-bezier(.2,.8,.2,1), box-shadow 0.28s ease;
+    cursor: default;
 }
 
 .media-card:hover {
-    transform: translateY(-5px);
-    box-shadow: var(--shadow-card);
+    transform: translateY(-6px);
+    box-shadow: 0 18px 40px rgba(16,20,12,0.08);
 }
 
 .media-image {
-    height: 200px;
+    height: 180px;
     background: linear-gradient(135deg, #abb400 0%, #ffffff 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
 }
 
 .media-card h3 {
-    padding: 20px 20px 10px;
+    padding: 22px 20px 8px;
     font-size: 18px;
+    font-weight: 700;
     color: var(--text-primary);
+    letter-spacing: 0.2px;
 }
 
 .media-card p {
-    padding: 0 20px 15px;
+    padding: 0 20px 16px;
     color: var(--text-secondary);
     font-size: 14px;
+    line-height: 1.6;
 }
 
 .card-link {
@@ -642,23 +649,24 @@ body {
 /* Generic button styles used across the site */
 .btn {
     display: inline-block;
-    padding: 8px 18px;
+    padding: 10px 18px;
     border-radius: 999px;
     font-weight: 600;
     font-size: 13px;
-    border: none;
+    border: 1px solid transparent;
     cursor: pointer;
-    transition: all 0.22s ease;
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
 }
 
 .btn-primary {
-    background: var(--primary-color);
+    background: linear-gradient(180deg, var(--primary-color), var(--primary-dark));
     color: var(--white);
-    box-shadow: 0 8px 18px rgba(143, 150, 0, 0.28);
+    border-color: rgba(0,0,0,0.06);
+    box-shadow: 0 6px 18px rgba(16,20,12,0.06);
 }
 
 .btn-primary:hover {
-    background: var(--primary-dark);
+    background: linear-gradient(180deg, var(--primary-dark), color-mix(in srgb, var(--primary-dark) 80%, black 20%));
     transform: translateY(-2px);
 }
 
