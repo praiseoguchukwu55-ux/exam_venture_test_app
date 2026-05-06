@@ -292,3 +292,61 @@ function toggleSeries(seriesId) {
         list.style.display = 'none';
     }
 }
+
+// Open Listen buttons (uses data-url attribute) without causing page text-selection/highlight
+document.addEventListener('click', (e) => {
+    const btn = e.target.closest && e.target.closest('.listen-btn');
+    if (!btn) return;
+    const url = btn.getAttribute('data-url');
+    if (!url) return;
+    // open in new tab safely
+    const a = document.createElement('a');
+    a.href = url;
+    a.target = '_blank';
+    a.rel = 'noopener noreferrer';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    try { btn.blur(); } catch (err) {}
+});
+
+// Mobile: collapse media grid and provide See more toggle
+document.addEventListener('DOMContentLoaded', () => {
+    const mediaGrid = document.getElementById('mediaGrid');
+    const seeMoreBtn = document.getElementById('seeMoreBtn');
+
+    function applyCollapsedState() {
+        if (!mediaGrid) return;
+        if (window.innerWidth <= 768) {
+            mediaGrid.classList.add('collapsed');
+            if (seeMoreBtn) {
+                seeMoreBtn.textContent = 'See more';
+                seeMoreBtn.setAttribute('aria-expanded', 'false');
+            }
+        } else {
+            mediaGrid.classList.remove('collapsed');
+            if (seeMoreBtn) {
+                seeMoreBtn.setAttribute('aria-expanded', 'true');
+            }
+        }
+    }
+
+    if (seeMoreBtn && mediaGrid) {
+        seeMoreBtn.addEventListener('click', () => {
+            const collapsed = mediaGrid.classList.toggle('collapsed');
+            if (collapsed) {
+                seeMoreBtn.textContent = 'See more';
+                seeMoreBtn.setAttribute('aria-expanded', 'false');
+                mediaGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else {
+                seeMoreBtn.textContent = 'See less';
+                seeMoreBtn.setAttribute('aria-expanded', 'true');
+                mediaGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        });
+    }
+
+    applyCollapsedState();
+    window.addEventListener('resize', applyCollapsedState);
+});

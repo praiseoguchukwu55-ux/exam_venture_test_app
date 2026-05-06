@@ -639,6 +639,76 @@ body {
     background: var(--primary-dark);
 }
 
+/* Generic button styles used across the site */
+.btn {
+    display: inline-block;
+    padding: 8px 18px;
+    border-radius: 999px;
+    font-weight: 600;
+    font-size: 13px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.22s ease;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: var(--white);
+    box-shadow: 0 8px 18px rgba(143, 150, 0, 0.28);
+}
+
+.btn-primary:hover {
+    background: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
+/* Listen buttons: match primary button but avoid selecting/highlighting the page */
+.listen-btn {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.btn:focus {
+    outline: none;
+}
+
+.btn:focus-visible {
+    box-shadow: 0 0 0 4px rgba(171, 180, 0, 0.18);
+}
+
+/* Mobile: collapse media grid and show 'See more' */
+.grid-actions {
+    text-align: center;
+    margin-top: 18px;
+}
+
+#seeMoreBtn {
+    display: none; /* shown only on small screens */
+}
+
+@media (max-width: 768px) {
+    .media-grid.collapsed .media-card {
+        display: none;
+    }
+
+    /* show first 4 cards when collapsed */
+    .media-grid.collapsed .media-card:nth-child(-n+4) {
+        display: block;
+    }
+
+    #seeMoreBtn {
+        display: inline-block;
+        margin: 0 auto;
+        padding: 10px 22px;
+        border-radius: 999px;
+    }
+}
+
+@media (min-width: 769px) {
+    #seeMoreBtn { display: none; }
+}
+
 /* ============================================
    Contact Section
    ============================================ */
