@@ -398,6 +398,34 @@ body {
     position: relative;
 }
 
+.power-summit-image {
+    background:
+        linear-gradient(rgba(35, 24, 10, 0.18), rgba(35, 24, 10, 0.18)),
+        url('powersummit1.0.jfif') center/cover no-repeat;
+    border-bottom: 1px solid rgba(35, 24, 10, 0.12);
+}
+
+.cultivating-prayer-image {
+    background:
+        linear-gradient(rgba(35, 10, 60, 0.16), rgba(35, 10, 60, 0.16)),
+        url('Cultivating a life of prayer 2.jfif') center/cover no-repeat;
+    border-bottom: 1px solid rgba(35, 10, 60, 0.12);
+}
+
+.leading-spirit-image {
+    background:
+        linear-gradient(rgba(15, 60, 120, 0.15), rgba(15, 60, 120, 0.15)),
+        url('The Leading of the Spirit.jfif') center/cover no-repeat;
+    border-bottom: 1px solid rgba(15, 60, 120, 0.12);
+}
+
+.vision-image {
+    background:
+        linear-gradient(rgba(84, 50, 150, 0.15), rgba(84, 50, 150, 0.15)),
+        url('The Vison of The Metropolitan Church.jfif') center/cover no-repeat;
+    border-bottom: 1px solid rgba(84, 50, 150, 0.12);
+}
+
 .media-card h3 {
     padding: 22px 20px 8px;
     font-size: 18px;
@@ -670,6 +698,18 @@ body {
     transform: translateY(-2px);
 }
 
+.btn-secondary {
+    background: transparent;
+    color: var(--text-primary);
+    border-color: var(--surface-border);
+}
+
+.btn-secondary:hover {
+    border-color: var(--primary-color);
+    color: var(--primary-dark);
+    transform: translateY(-2px);
+}
+
 /* Listen buttons: match primary button but avoid selecting/highlighting the page */
 .listen-btn {
     -webkit-tap-highlight-color: transparent;
@@ -683,6 +723,193 @@ body {
 
 .btn:focus-visible {
     box-shadow: 0 0 0 4px rgba(171, 180, 0, 0.18);
+}
+
+/* ============================================
+   Unavailable / Admin Access Pages
+   ============================================ */
+.notice-card,
+.auth-panel {
+    background: linear-gradient(180deg, rgba(255,255,255,0.94), rgba(245,248,239,0.98));
+    border: 1px solid var(--surface-border);
+    border-radius: 26px;
+    padding: 28px;
+    box-shadow: var(--shadow-soft);
+}
+
+.notice-tag,
+.auth-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    background: rgba(171, 180, 0, 0.12);
+    color: var(--primary-dark);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.notice-card h2,
+.auth-panel h2 {
+    margin-top: 16px;
+    margin-bottom: 12px;
+    font-size: clamp(26px, 4vw, 38px);
+}
+
+.notice-card p,
+.auth-panel p,
+.page-intro {
+    color: var(--text-secondary);
+    line-height: 1.75;
+}
+
+.notice-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 24px;
+}
+
+.auth-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+    gap: 24px;
+    align-items: start;
+}
+
+.auth-panel ul {
+    margin-top: 18px;
+    padding-left: 18px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+}
+
+.auth-form {
+    display: grid;
+    gap: 14px;
+    margin-top: 12px;
+}
+
+.auth-form label {
+    display: grid;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.auth-form input,
+.auth-form select,
+.auth-form textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--surface-border);
+    border-radius: 14px;
+    background: var(--input-bg);
+    color: var(--input-color);
+    font-family: inherit;
+    font-size: 14px;
+}
+
+.auth-form textarea {
+    min-height: 110px;
+    resize: vertical;
+}
+
+.auth-form input:focus,
+.auth-form select:focus,
+.auth-form textarea:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px rgba(168, 178, 17, 0.18);
+}
+
+.auth-form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.login-error {
+    min-height: 18px;
+    color: #a82c2c;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.details-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 18px;
+}
+
+.details-note {
+    color: var(--text-secondary);
+    font-size: 13px;
+}
+
+.table-shell {
+    overflow-x: auto;
+    border: 1px solid var(--surface-border);
+    border-radius: 22px;
+    background: var(--card-bg);
+    box-shadow: var(--shadow-soft);
+}
+
+.believer-table {
+    width: 100%;
+    min-width: 980px;
+    border-collapse: collapse;
+}
+
+.believer-table th,
+.believer-table td {
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--surface-border);
+    text-align: left;
+    font-size: 14px;
+    vertical-align: top;
+}
+
+.believer-table th {
+    background: rgba(171, 180, 0, 0.1);
+    color: var(--text-primary);
+    font-size: 12px;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.believer-table tbody tr:nth-child(even) {
+    background: rgba(255, 255, 255, 0.55);
+}
+
+.empty-state-row td {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 28px 16px;
+}
+
+.record-form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+}
+
+.record-form-grid .full-width {
+    grid-column: 1 / -1;
+}
+
+@media (max-width: 860px) {
+    .auth-layout,
+    .record-form-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* Mobile: collapse media grid and show 'See more' */

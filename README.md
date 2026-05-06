@@ -11,6 +11,8 @@ TMC Church/
 ├── videos.html
 ├── songs.html
 ├── ebooks.html
+├── believer-login.html
+├── believer-details.html
 ├── links.html
 ├── contact.html
 ├── styles.css
@@ -25,11 +27,16 @@ Open `index.html` directly in any browser.
 
 No Node.js server, admin panel, or API is required.
 
+The Radio, Videos, Songs, and E-Books pages currently show a "not available" notice.
+
+The Believer Details page is protected by a client-side admin login and stores records in the browser using localStorage.
+
 ## Editing Content
 
 - Update page content directly in the HTML files.
 - Update styling in `styles.css`.
 - Update interactions in `script.js`.
+- Admin login credentials and believer record handling are configured in `script.js`.
 
 ## Browser Support
 

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Links | The Metropolitan Church, Ibadan</title>
+    <title>Believer Login | The Metropolitan Church, Ibadan</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -38,39 +38,37 @@
         <p>Equipping The Saints, edifying the Church.</p>
     </section>
 
-
-    <section class="search-section">
-        <div class="container">
-            <div class="search-box">
-                <input type="text" id="searchInput" class="search-input" placeholder="Search links...">
-                <button id="searchBtn" class="search-btn">Search</button>
-            </div>
-        </div>
-    </section>
-        <section class="breadcrumb-bar" aria-label="Breadcrumb">
-        <div class="container">
-            <nav class="breadcrumb">
-                <a href="index.html" aria-label="Home">&#8962;</a>
-                <span class="breadcrumb-separator">&gt;</span>
-                <span class="breadcrumb-current">Links</span>
-            </nav>
-        </div>
-    </section>
     <section class="section bg-light">
-        <div class="container">
-            <h2 class="section-title">Useful Links & Resources</h2>
-            <div id="linksContent">
-                <ul style="list-style: none; padding: 0;">
-                    <li style="padding: 12px 0; border-bottom: 1px solid #d8e1cf;">
-                        <a href="believer-login.html" style="color: #abb400; text-decoration: none; font-weight: 500;">Believer Details Login →</a>
-                    </li>
-                    <li style="padding: 12px 0; border-bottom: 1px solid #d8e1cf;">
-                        <a href="https://www.biblegateway.com" target="_blank" style="color: #abb400; text-decoration: none; font-weight: 500;">BibleGateway →</a>
-                    </li>
-                    <li style="padding: 12px 0; border-bottom: 1px solid #d8e1cf;">
-                        <a href="https://www.sermonaudio.com" target="_blank" style="color: #abb400; text-decoration: none; font-weight: 500;">Sermon Audio →</a>
-                    </li>
+        <div class="container auth-layout">
+            <div class="auth-panel">
+                <span class="auth-kicker">Protected Access</span>
+                <h2>Believer Records</h2>
+                <p>Only the admin can access the believer details page.</p>
+                <ul>
+                    <li>Login is required before records can be viewed or added.</li>
+                    <li>Fields include name, contact, email address, level, school name, address in school, and address at home.</li>
+                    <li>The details page stores records locally in this browser session.</li>
                 </ul>
+            </div>
+
+            <div class="auth-panel">
+                <h2>Admin Login</h2>
+                <p>Use the admin credentials to continue.</p>
+                <form id="adminLoginForm" class="auth-form" autocomplete="off">
+                    <label for="adminUsername">
+                        Username
+                        <input type="text" id="adminUsername" required>
+                    </label>
+                    <label for="adminPassword">
+                        Password
+                        <input type="password" id="adminPassword" required>
+                    </label>
+                    <p id="loginError" class="login-error" aria-live="polite"></p>
+                    <div class="auth-form-actions">
+                        <button type="submit" class="btn btn-primary">Sign In</button>
+                        <a href="index.html" class="btn btn-secondary">Back to Messages</a>
+                    </div>
+                </form>
             </div>
         </div>
     </section>

@@ -315,20 +315,35 @@ document.addEventListener('click', (e) => {
 document.addEventListener('DOMContentLoaded', () => {
     const mediaGrid = document.getElementById('mediaGrid');
     const seeMoreBtn = document.getElementById('seeMoreBtn');
+    let isMobileLayout = null;
+
+    function setCollapsedState(collapsed) {
+        if (!mediaGrid) return;
+
+        mediaGrid.classList.toggle('collapsed', collapsed);
+
+        if (seeMoreBtn) {
+            seeMoreBtn.textContent = collapsed ? 'See more' : 'See less';
+            seeMoreBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        }
+    }
 
     function applyCollapsedState() {
         if (!mediaGrid) return;
-        if (window.innerWidth <= 768) {
-            mediaGrid.classList.add('collapsed');
-            if (seeMoreBtn) {
-                seeMoreBtn.textContent = 'See more';
-                seeMoreBtn.setAttribute('aria-expanded', 'false');
-            }
-        } else {
-            mediaGrid.classList.remove('collapsed');
-            if (seeMoreBtn) {
-                seeMoreBtn.setAttribute('aria-expanded', 'true');
-            }
+
+        const nextIsMobileLayout = window.innerWidth <= 768;
+
+        if (isMobileLayout === null || nextIsMobileLayout !== isMobileLayout) {
+            isMobileLayout = nextIsMobileLayout;
+            setCollapsedState(nextIsMobileLayout);
+            return;
+        }
+
+        if (!nextIsMobileLayout) {
+            setCollapsedState(false);
+        } else if (!mediaGrid.classList.contains('collapsed') && seeMoreBtn) {
+            seeMoreBtn.textContent = 'See less';
+            seeMoreBtn.setAttribute('aria-expanded', 'true');
         }
     }
 
@@ -349,4 +364,193 @@ document.addEventListener('DOMContentLoaded', () => {
 
     applyCollapsedState();
     window.addEventListener('resize', applyCollapsedState);
+});
+
+// ============================================
+// Admin Login / Believer Details
+// ============================================
+const adminAuthKey = 'tmcBelieversAdminAuth';
+const believerRecordsKey = 'tmcBelieverRecords';
+const adminUsername = 'admin';
+const adminPassword = 'TMC2026!';
+
+// Official fixed believer list (as provided) — Hall mapped to schoolAddress, Number to contact
+const officialBelieverRecords = [
+    { name: 'Brother King Abiola', department: 'EHS', schoolAddress: 'Tedder A51', contact: '07045538433' },
+    { name: 'Sister Victory Nwokocha', department: 'Economics', schoolAddress: 'Queens I25', contact: '09064292277' },
+    { name: 'Brother Harel West (Davi)', department: 'Mechanical engineering', schoolAddress: 'Indy A51', contact: '07057449947' },
+    { name: 'Brother Samson', department: 'Political science', schoolAddress: 'Kuti B47', contact: '07047482999' },
+    { name: 'Sister Testimony', department: 'Geology', schoolAddress: 'Queens', contact: '07030011378' },
+    { name: 'Sister Adedayo', department: 'Dentistry', schoolAddress: 'India', contact: '07016205604' },
+    { name: 'Brother Peter Goodluck', department: 'Quantity Survey', schoolAddress: 'Kuti B2', contact: '07075224378' },
+    { name: 'Sister Oluwafadekemi', department: 'Adult Education', schoolAddress: 'Awo D63', contact: '+2348140123763' },
+    { name: 'Sister Olamide', department: 'Adult Education', schoolAddress: 'Awo D63', contact: '09167231827' },
+    { name: 'Sister Rachael', department: 'Sociology', schoolAddress: 'Awo D64', contact: '09079157366' },
+    { name: 'Sister Divine Oluebube Ojinmah', department: 'Agricultural economics', schoolAddress: 'Awo D62', contact: '08165225125' },
+    { name: 'Sister Teni Adetayo', department: 'Adult Education', schoolAddress: 'Awo D63', contact: '+2349065059169' },
+    { name: 'Brother Olaoluwa', department: 'Agricultural Engineering', schoolAddress: 'Kuti B47', contact: '+2348127601769' },
+    { name: 'Brother Asegun', department: 'MBBS', schoolAddress: 'Kuti B47', contact: '+2347054949218' },
+    { name: 'Brother Victor', department: 'Food Tech', schoolAddress: '', contact: '+2347048907891' },
+    { name: 'Brother Tega', department: '', schoolAddress: 'Kuti', contact: '+2348160110146' },
+    { name: 'Brother Michael', department: 'Pet Engineering', schoolAddress: 'Kuti B48', contact: '08144739800' },
+    { name: 'Brother Temi Oyaromade', department: 'MBBS 400l', schoolAddress: 'Mellanby', contact: '08102318021' },
+    { name: 'Ayomide Yaya', department: 'Law', schoolAddress: 'Ojoh', contact: '09044267892' },
+    { name: 'Demilade Adekoya', department: 'Petroleum Engineering', schoolAddress: 'Bello A42', contact: '09150673737' },
+    { name: 'King Abuh', department: 'Electrolum Engineering', schoolAddress: 'Bello A45', contact: '09067350519' },
+    { name: 'Stephen Nnachiajah', department: 'Accounting', schoolAddress: 'Bello A50', contact: '07025867569' },
+    { name: 'Eliam Ilesanmi', department: 'Biochemistry', schoolAddress: 'Agbwo', contact: '09049972727' },
+    { name: 'Joshua Amadi', department: 'Geography', schoolAddress: 'Kuti B4', contact: '08109662858' },
+    { name: 'Bro Vincent', department: 'Biochemistry', schoolAddress: 'Zik C65', contact: '+2347049606166' },
+    { name: 'Brother Seun', department: 'Architecture', schoolAddress: 'Kuti B4', contact: '07082981427' },
+    { name: 'Brother Divine Adeleye', department: 'Political science', schoolAddress: 'Kuti B8', contact: '08069155406' },
+    { name: 'Sister Miracle', department: '', schoolAddress: '', contact: '07034950696', occupation: 'Corper' }
+];
+
+function isAdminAuthenticated() {
+    return sessionStorage.getItem(adminAuthKey) === 'true';
+}
+
+function getBelieverRecords() {
+    try {
+        const storedRecords = localStorage.getItem(believerRecordsKey);
+        return storedRecords ? JSON.parse(storedRecords) : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function saveBelieverRecords(records) {
+    localStorage.setItem(believerRecordsKey, JSON.stringify(records));
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function renderBelieverRecords() {
+    const tableBody = document.getElementById('believerTableBody');
+    if (!tableBody) return;
+
+    const records = getBelieverRecords();
+
+    if (records.length === 0) {
+        tableBody.innerHTML = '<tr class="empty-state-row"><td colspan="9">No believer records have been added yet.</td></tr>';
+        return;
+    }
+    tableBody.innerHTML = records.map((record, idx) => `
+        <tr>
+            <td>${idx + 1}</td>
+            <td>${escapeHtml(record.name)}</td>
+            <td>${escapeHtml(record.department || '')}</td>
+            <td>${escapeHtml(record.contact)}</td>
+            <td>${escapeHtml(record.email)}</td>
+            <td>${escapeHtml(record.level)}</td>
+            <td>${escapeHtml(record.schoolName)}</td>
+            <td>${escapeHtml(record.schoolAddress)}</td>
+            <td>${escapeHtml(record.homeAddress)}</td>
+        </tr>
+    `).join('');
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('adminLoginForm');
+    const loginError = document.getElementById('loginError');
+
+    if (loginForm) {
+        if (isAdminAuthenticated()) {
+            window.location.replace('believer-details.html');
+            return;
+        }
+
+        loginForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const username = document.getElementById('adminUsername')?.value.trim();
+            const password = document.getElementById('adminPassword')?.value;
+
+            if (username === adminUsername && password === adminPassword) {
+                sessionStorage.setItem(adminAuthKey, 'true');
+                window.location.href = 'believer-details.html';
+                return;
+            }
+
+            if (loginError) {
+                loginError.textContent = 'Invalid admin username or password.';
+            }
+        });
+    }
+
+    const believerDetailsPage = document.getElementById('believerDetailsPage');
+    if (believerDetailsPage) {
+        if (!isAdminAuthenticated()) {
+            window.location.replace('believer-login.html');
+            return;
+        }
+
+        // Replace stored records with the official provided list
+        saveBelieverRecords(officialBelieverRecords);
+
+        const detailsForm = document.getElementById('believerForm');
+        const logoutButton = document.getElementById('logoutBtn');
+
+        renderBelieverRecords();
+
+        if (detailsForm) {
+            detailsForm.addEventListener('submit', (event) => {
+                event.preventDefault();
+
+                const newRecord = {
+                    name: document.getElementById('believerName')?.value.trim(),
+                    contact: document.getElementById('believerContact')?.value.trim(),
+                    email: document.getElementById('believerEmail')?.value.trim(),
+                    department: document.getElementById('believerDepartment')?.value.trim(),
+                    level: document.getElementById('believerLevel')?.value.trim(),
+                    schoolName: document.getElementById('schoolName')?.value.trim(),
+                    schoolAddress: document.getElementById('schoolAddress')?.value.trim(),
+                    homeAddress: document.getElementById('homeAddress')?.value.trim()
+                };
+
+                if (!newRecord.name || !newRecord.contact) {
+                    return;
+                }
+
+                const records = getBelieverRecords();
+                records.unshift(newRecord);
+                saveBelieverRecords(records);
+                detailsForm.reset();
+                renderBelieverRecords();
+            });
+        }
+
+        // Migration: move department-like values from `level` into `department` when department is empty
+        (function migrateLevelToDepartment() {
+            const records = getBelieverRecords();
+            let changed = false;
+            for (let i = 0; i < records.length; i++) {
+                const r = records[i];
+                if ((!r.department || r.department === '') && r.level && r.level.trim() !== '') {
+                    // Move the level content into department and clear level
+                    r.department = r.level;
+                    r.level = '';
+                    changed = true;
+                }
+            }
+            if (changed) {
+                saveBelieverRecords(records);
+                renderBelieverRecords();
+            }
+        })();
+
+        if (logoutButton) {
+            logoutButton.addEventListener('click', () => {
+                sessionStorage.removeItem(adminAuthKey);
+                window.location.href = 'believer-login.html';
+            });
+        }
+    }
 });

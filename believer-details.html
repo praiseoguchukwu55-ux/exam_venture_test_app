@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Believer Details | The Metropolitan Church, Ibadan</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-logo">
+                <img src="logo.png" alt="The Metropolitan Church logo" class="church-logo-image">
+                <div class="brand-text">
+                    <span class="church-name">The Metropolitan Church, Ibadan</span>
+                    <span class="church-motto">Equipping The Saints, edifying the Church.</span>
+                </div>
+            </div>
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item"><a href="index.html" class="nav-link">MESSAGES</a></li>
+                <li class="nav-item"><a href="radio.html" class="nav-link">RADIO</a></li>
+                <li class="nav-item"><a href="videos.html" class="nav-link">VIDEOS</a></li>
+                <li class="nav-item"><a href="songs.html" class="nav-link">SONGS</a></li>
+                <li class="nav-item"><a href="ebooks.html" class="nav-link">EBOOKS</a></li>
+                <li class="nav-item"><a href="links.html" class="nav-link">LINKS</a></li>
+                <li class="nav-item"><a href="believer-login.html" class="nav-link">BELIEVERS</a></li>
+                <li class="nav-item"><a href="contact.html" class="nav-link">CONTACT</a></li>
+            </ul>
+            <div class="nav-toggle" id="navToggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </nav>
+
+    <section class="motto-banner" aria-label="Church motto">
+        <p>Equipping The Saints, edifying the Church.</p>
+    </section>
+
+    <section class="section bg-light">
+        <div class="container" id="believerDetailsPage">
+            <div class="details-toolbar">
+                <div>
+                    <span class="auth-kicker">Protected Records</span>
+                    <h2>Believer Details</h2>
+                    <p class="details-note">Add and review the requested believer information below.</p>
+                </div>
+                <button type="button" id="logoutBtn" class="btn btn-secondary">Logout</button>
+            </div>
+
+            <div class="auth-layout">
+                <div class="auth-panel">
+                    <h2>Add Believer</h2>
+                    <p>Fill in the record and save it to the table.</p>
+                    <form id="believerForm" class="auth-form">
+                        <div class="record-form-grid">
+                            <label>
+                                Name
+                                <input type="text" id="believerName" required>
+                            </label>
+                            <label>
+                                Contact
+                                <input type="text" id="believerContact" required>
+                            </label>
+                            <label>
+                                Email Address
+                                <input type="email" id="believerEmail" required>
+                            </label>
+                            <label>
+                                Department
+                                <input type="text" id="believerDepartment">
+                            </label>
+                            <label>
+                                Level
+                                <input type="text" id="believerLevel" required>
+                            </label>
+                            <label>
+                                School Name
+                                <input type="text" id="schoolName" required>
+                            </label>
+                            <label>
+                                Address in School
+                                <input type="text" id="schoolAddress" required>
+                            </label>
+                            <label class="full-width">
+                                Address at Home
+                                <textarea id="homeAddress" required></textarea>
+                            </label>
+                        </div>
+                        <div class="auth-form-actions">
+                            <button type="submit" class="btn btn-primary">Save Record</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="auth-panel">
+                    <div class="details-toolbar">
+                        <div>
+                            <h2>Saved Details</h2>
+                            <p class="details-note">Records added here stay in this browser until cleared.</p>
+                        </div>
+                    </div>
+                    <div class="table-shell">
+                        <table class="believer-table">
+                            <thead>
+                                <tr>
+                                    <th>S/N</th>
+                                    <th>Name</th>
+                                    <th>Department</th>
+                                    <th>Contact</th>
+                                    <th>Email Address</th>
+                                    <th>Level</th>
+                                    <th>School Name</th>
+                                    <th>Address in School</th>
+                                    <th>Address at Home</th>
+                                </tr>
+                            </thead>
+                            <tbody id="believerTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2026 The Metropolitan Church, Ibadan. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
