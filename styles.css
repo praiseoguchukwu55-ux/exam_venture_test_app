@@ -324,22 +324,45 @@ body {
 }
 
 .cta-button {
-    background: var(--primary-color);
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     color: var(--white);
     border: none;
     padding: 15px 40px;
     font-size: 16px;
-    font-weight: 600;
-    border-radius: 999px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-radius: 14px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 10px 22px rgba(143, 150, 0, 0.35);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 12px 28px rgba(143, 150, 0, 0.32);
+    position: relative;
+    overflow: hidden;
+}
+
+.cta-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.6s ease;
+}
+
+.cta-button:hover::before {
+    left: 100%;
 }
 
 .cta-button:hover {
-    background: var(--primary-dark);
-    transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, color-mix(in srgb, var(--primary-dark) 70%, black 30%) 100%);
+    transform: translateY(-4px);
+    box-shadow: 0 16px 36px rgba(143, 150, 0, 0.4);
+}
+
+.cta-button:active {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(143, 150, 0, 0.28);
 }
 
 /* ============================================
@@ -674,55 +697,179 @@ body {
     background: var(--primary-dark);
 }
 
+/* ============================================
+   Enhanced Button Styles - Mature & Professional
+   ============================================ */
+
 /* Generic button styles used across the site */
 .btn {
-    display: inline-block;
-    padding: 10px 18px;
-    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 11px 22px;
+    border-radius: 12px;
     font-weight: 600;
-    font-size: 13px;
-    border: 1px solid transparent;
+    font-size: 14px;
+    border: none;
     cursor: pointer;
-    transition: transform 0.18s ease, box-shadow 0.18s ease, background-color 0.18s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
 }
 
+/* Enhanced Primary Button */
 .btn-primary {
-    background: linear-gradient(180deg, var(--primary-color), var(--primary-dark));
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
     color: var(--white);
-    border-color: rgba(0,0,0,0.06);
-    box-shadow: 0 6px 18px rgba(16,20,12,0.06);
+    box-shadow: 0 8px 24px rgba(171, 180, 0, 0.25);
+    letter-spacing: 0.3px;
+}
+
+.btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.btn-primary:hover::before {
+    left: 100%;
 }
 
 .btn-primary:hover {
-    background: linear-gradient(180deg, var(--primary-dark), color-mix(in srgb, var(--primary-dark) 80%, black 20%));
-    transform: translateY(-2px);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, color-mix(in srgb, var(--primary-dark) 70%, black 30%) 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(171, 180, 0, 0.35);
 }
 
+.btn-primary:active {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(171, 180, 0, 0.25);
+}
+
+/* Secondary Button - Outlined Style */
 .btn-secondary {
     background: transparent;
     color: var(--text-primary);
-    border-color: var(--surface-border);
+    border: 2px solid var(--surface-border);
 }
 
 .btn-secondary:hover {
     border-color: var(--primary-color);
+    background: rgba(171, 180, 0, 0.06);
     color: var(--primary-dark);
     transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(171, 180, 0, 0.12);
 }
 
-/* Listen buttons: match primary button but avoid selecting/highlighting the page */
+.btn-secondary:active {
+    transform: translateY(0);
+}
+
+/* Open Series Button - Unique Chevron Style */
+.btn[onclick*="toggleSeries"] {
+    background: linear-gradient(135deg, #6b8e00 0%, #5a7600 100%);
+    color: #ffffff;
+    box-shadow: 0 8px 24px rgba(107, 142, 0, 0.28);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    font-weight: 700;
+    letter-spacing: 0.5px;
+}
+
+.btn[onclick*="toggleSeries"]::after {
+    content: '▼';
+    display: inline-block;
+    font-size: 10px;
+    margin-left: 4px;
+    transition: transform 0.3s ease;
+}
+
+.btn[onclick*="toggleSeries"]:hover {
+    background: linear-gradient(135deg, #5a7600 0%, #4a6500 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 32px rgba(107, 142, 0, 0.35);
+}
+
+.btn[onclick*="toggleSeries"]:hover::after {
+    transform: translateY(2px);
+}
+
+/* Listen Button - Audio Player Style */
 .listen-btn {
+    background: linear-gradient(135deg, #8f9600 0%, #7a8200 100%);
+    color: #ffffff;
+    box-shadow: 0 6px 20px rgba(143, 150, 0, 0.24);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     -webkit-tap-highlight-color: transparent;
     user-select: none;
     -webkit-user-select: none;
+    padding: 9px 18px;
+    font-size: 13px;
+    font-weight: 600;
+    position: relative;
 }
 
+.listen-btn::before {
+    content: '▶';
+    display: inline-block;
+    margin-right: 6px;
+    font-size: 11px;
+    transition: transform 0.3s ease;
+}
+
+.listen-btn:hover {
+    background: linear-gradient(135deg, #7a8200 0%, #6a7200 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(143, 150, 0, 0.32);
+}
+
+.listen-btn:hover::before {
+    transform: scale(1.2);
+}
+
+.listen-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 4px 12px rgba(143, 150, 0, 0.2);
+}
+
+/* Folder Access Button - File Manager Style */
+.listen-btn[aria-label*="Folder"],
+.listen-btn[aria-label*="Access Folder"] {
+    background: linear-gradient(135deg, #7a6f4a 0%, #5f5840 100%);
+    box-shadow: 0 8px 22px rgba(80, 70, 40, 0.24);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    font-weight: 700;
+    letter-spacing: 0.3px;
+}
+
+.listen-btn[aria-label*="Folder"]::before,
+.listen-btn[aria-label*="Access Folder"]::before {
+    content: '📁';
+    display: inline-block;
+    margin-right: 6px;
+    font-size: 13px;
+}
+
+.listen-btn[aria-label*="Folder"]:hover,
+.listen-btn[aria-label*="Access Folder"]:hover {
+    background: linear-gradient(135deg, #5f5840 0%, #4a4630 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(80, 70, 40, 0.32);
+}
+
+/* General button focus state */
 .btn:focus {
     outline: none;
 }
 
 .btn:focus-visible {
-    box-shadow: 0 0 0 4px rgba(171, 180, 0, 0.18);
+    box-shadow: 0 0 0 4px rgba(171, 180, 0, 0.25), 
+                inset 0 0 0 2px rgba(171, 180, 0, 0.4);
 }
 
 /* ============================================
@@ -1131,25 +1278,42 @@ body {
     padding: 12px 20px 18px;
 }
 
-.series-card .btn {
-    background: var(--primary-color);
-    color: var(--white);
-    border: none;
-    padding: 8px 14px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-.series-card .btn:hover {
-    background: var(--primary-dark);
-}
-
 .volume-list {
-    background: linear-gradient(180deg, rgba(171,180,0,0.04), rgba(255,255,255,0.02));
-    border: 1px solid var(--surface-border);
-    border-radius: 10px;
-    padding: 12px 14px;
+    background: linear-gradient(135deg, rgba(171,180,0,0.08), rgba(171,180,0,0.03));
+    border: 2px solid rgba(171, 180, 0, 0.2);
+    border-radius: 14px;
+    padding: 16px 18px;
+    animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.volume-list ul li {
+    padding: 10px 12px;
+    border-bottom: 1px solid rgba(171, 180, 0, 0.1);
+    border-radius: 8px;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.volume-list ul li:last-child {
+    border-bottom: none;
+}
+
+.volume-list ul li:hover {
+    background: rgba(171, 180, 0, 0.06);
+    padding-left: 16px;
 }
 
 .volume-list ul li a {
@@ -1160,7 +1324,10 @@ body {
 
 .volume-list ul li strong {
     color: var(--text-primary);
-    margin-right: 6px;
+    margin-right: 8px;
+    font-weight: 700;
+    display: inline-block;
+    min-width: 85px;
 }
 
 @media (max-width: 640px) {
@@ -1216,21 +1383,42 @@ body {
 }
 
 .search-btn {
-    padding: 12px 25px;
-    background-color: var(--input-bg);
-    color: var(--primary-color);
-    border: 2px solid var(--surface-border);
-    border-radius: 999px;
+    padding: 12px 28px;
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark) 100%);
+    color: var(--white);
+    border: none;
+    border-radius: 12px;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 20px rgba(143, 150, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+    letter-spacing: 0.3px;
+}
+
+.search-btn::before {
+    content: '🔍';
+    display: inline-block;
+    margin-right: 6px;
+    font-size: 14px;
+    transition: transform 0.3s ease;
 }
 
 .search-btn:hover {
-    background-color: var(--primary-dark);
-    color: var(--white);
-    border-color: var(--primary-dark);
+    background: linear-gradient(135deg, var(--primary-dark) 0%, color-mix(in srgb, var(--primary-dark) 70%, black 30%) 100%);
+    transform: translateY(-3px);
+    box-shadow: 0 12px 28px rgba(143, 150, 0, 0.4);
+}
+
+.search-btn:hover::before {
+    transform: scale(1.15);
+}
+
+.search-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(143, 150, 0, 0.28);
 }
 
 .no-results {
