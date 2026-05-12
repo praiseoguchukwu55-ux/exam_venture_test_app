@@ -371,8 +371,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================
 const adminAuthKey = 'tmcBelieversAdminAuth';
 const believerRecordsKey = 'tmcBelieverRecords';
-const adminUsername = 'admin';
-const adminPassword = 'TMC2026!';
+const adminUsername = 'adminTMC';
+const adminPassword = 'TMC2026!@';
 
 // Official fixed believer list (as provided) — Hall mapped to schoolAddress, Number to contact
 const officialBelieverRecords = [

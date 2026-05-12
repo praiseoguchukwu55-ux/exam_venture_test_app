@@ -18,12 +18,10 @@
             </div>
             <ul class="nav-menu" id="navMenu">
                 <li class="nav-item"><a href="index.html" class="nav-link">MESSAGES</a></li>
-                <li class="nav-item"><a href="radio.html" class="nav-link">RADIO</a></li>
+                <li class="nav-item"><a href="photos.html" class="nav-link">PHOTOS</a></li>
                 <li class="nav-item"><a href="videos.html" class="nav-link">VIDEOS</a></li>
                 <li class="nav-item"><a href="songs.html" class="nav-link">SONGS</a></li>
                 <li class="nav-item"><a href="ebooks.html" class="nav-link">EBOOKS</a></li>
-                <li class="nav-item"><a href="links.html" class="nav-link">LINKS</a></li>
-                <li class="nav-item"><a href="believer-login.html" class="nav-link">BELIEVERS</a></li>
                 <li class="nav-item"><a href="contact.html" class="nav-link">CONTACT</a></li>
             </ul>
             <div class="nav-toggle" id="navToggle">
@@ -40,85 +38,13 @@
 
     <section class="section bg-light">
         <div class="container" id="believerDetailsPage">
-            <div class="details-toolbar">
-                <div>
-                    <span class="auth-kicker">Protected Records</span>
-                    <h2>Believer Details</h2>
-                    <p class="details-note">Add and review the requested believer information below.</p>
-                </div>
-                <button type="button" id="logoutBtn" class="btn btn-secondary">Logout</button>
-            </div>
-
-            <div class="auth-layout">
-                <div class="auth-panel">
-                    <h2>Add Believer</h2>
-                    <p>Fill in the record and save it to the table.</p>
-                    <form id="believerForm" class="auth-form">
-                        <div class="record-form-grid">
-                            <label>
-                                Name
-                                <input type="text" id="believerName" required>
-                            </label>
-                            <label>
-                                Contact
-                                <input type="text" id="believerContact" required>
-                            </label>
-                            <label>
-                                Email Address
-                                <input type="email" id="believerEmail" required>
-                            </label>
-                            <label>
-                                Department
-                                <input type="text" id="believerDepartment">
-                            </label>
-                            <label>
-                                Level
-                                <input type="text" id="believerLevel" required>
-                            </label>
-                            <label>
-                                School Name
-                                <input type="text" id="schoolName" required>
-                            </label>
-                            <label>
-                                Address in School
-                                <input type="text" id="schoolAddress" required>
-                            </label>
-                            <label class="full-width">
-                                Address at Home
-                                <textarea id="homeAddress" required></textarea>
-                            </label>
-                        </div>
-                        <div class="auth-form-actions">
-                            <button type="submit" class="btn btn-primary">Save Record</button>
-                        </div>
-                    </form>
-                </div>
-
-                <div class="auth-panel">
-                    <div class="details-toolbar">
-                        <div>
-                            <h2>Saved Details</h2>
-                            <p class="details-note">Records added here stay in this browser until cleared.</p>
-                        </div>
-                    </div>
-                    <div class="table-shell">
-                        <table class="believer-table">
-                            <thead>
-                                <tr>
-                                    <th>S/N</th>
-                                    <th>Name</th>
-                                    <th>Department</th>
-                                    <th>Contact</th>
-                                    <th>Email Address</th>
-                                    <th>Level</th>
-                                    <th>School Name</th>
-                                    <th>Address in School</th>
-                                    <th>Address at Home</th>
-                                </tr>
-                            </thead>
-                            <tbody id="believerTableBody"></tbody>
-                        </table>
-                    </div>
+            <div class="auth-panel" style="max-width: 760px; margin: 0 auto;">
+                <span class="auth-kicker">Protected Records</span>
+                <h2>Admin Spreadsheet</h2>
+                <p>This page is limited to admin access. Use the spreadsheet link below to view the records.</p>
+                <div class="details-toolbar-actions" style="margin-top: 22px; flex-wrap: wrap;">
+                    <a href="https://docs.google.com/spreadsheets/d/1bCGuGFbTkvkgX9Ftc40aV59Pl0Q-dfIAztJ81ndfBuY/edit?usp=sharing" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Open Admin Spreadsheet</a>
+                    <button type="button" id="logoutBtn" class="btn btn-secondary">Logout</button>
                 </div>
             </div>
         </div>
@@ -126,6 +52,9 @@
 
     <footer class="footer">
         <div class="container">
+            <div class="footer-admin-link">
+                <a href="believer-login.html">Admin Access</a>
+            </div>
             <div class="footer-bottom">
                 <p>&copy; 2026 The Metropolitan Church, Ibadan. All rights reserved.</p>
             </div>
