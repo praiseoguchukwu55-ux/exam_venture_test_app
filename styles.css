@@ -424,28 +424,28 @@ body {
 .power-summit-image {
     background:
         linear-gradient(rgba(35, 24, 10, 0.18), rgba(35, 24, 10, 0.18)),
-        url('powersummit1.0.jfif') center/cover no-repeat;
+        url('https://res.cloudinary.com/db1aj40dk/image/upload/v1778685741/powersummit1.0_k0af6x.jpg') center/cover no-repeat;
     border-bottom: 1px solid rgba(35, 24, 10, 0.12);
 }
 
 .cultivating-prayer-image {
     background:
         linear-gradient(rgba(35, 10, 60, 0.16), rgba(35, 10, 60, 0.16)),
-        url('Cultivating a life of prayer 2.jfif') center/cover no-repeat;
+        url('https://res.cloudinary.com/db1aj40dk/image/upload/v1778685740/cultivatingalifeofprayer_sh8bt3.jpg') center/cover no-repeat;
     border-bottom: 1px solid rgba(35, 10, 60, 0.12);
 }
 
 .leading-spirit-image {
     background:
         linear-gradient(rgba(15, 60, 120, 0.15), rgba(15, 60, 120, 0.15)),
-        url('The Leading of the Spirit.jfif') center/cover no-repeat;
+        url('https://res.cloudinary.com/db1aj40dk/image/upload/v1778685742/The_Leading_of_the_Spirit_y01jgt.jpg') center/cover no-repeat;
     border-bottom: 1px solid rgba(15, 60, 120, 0.12);
 }
 
 .vision-image {
     background:
         linear-gradient(rgba(84, 50, 150, 0.15), rgba(84, 50, 150, 0.15)),
-        url('The Vison of The Metropolitan Church.jfif') center/cover no-repeat;
+        url('https://res.cloudinary.com/db1aj40dk/image/upload/v1778685740/The_Vison_of_The_Metropolitan_Church_e2byh7.jpg') center/cover no-repeat;
     border-bottom: 1px solid rgba(84, 50, 150, 0.12);
 }
 
