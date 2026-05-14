@@ -311,59 +311,101 @@ document.addEventListener('click', (e) => {
     try { btn.blur(); } catch (err) {}
 });
 
-// Mobile: collapse media grid and provide See more toggle
+// Mobile messages reveal: show 5 first, then reveal 10 more per tap
 document.addEventListener('DOMContentLoaded', () => {
     const mediaGrid = document.getElementById('mediaGrid');
     const seeMoreBtn = document.getElementById('seeMoreBtn');
+    if (!mediaGrid || !seeMoreBtn) return;
+
+    const initialVisibleCount = 5;
+    const revealStep = 10;
+    let visibleCount = initialVisibleCount;
     let isMobileLayout = null;
 
-    function setCollapsedState(collapsed) {
-        if (!mediaGrid) return;
+    function getCards() {
+        return Array.from(mediaGrid.querySelectorAll('.media-card'));
+    }
 
-        mediaGrid.classList.toggle('collapsed', collapsed);
+    function scrollCardIntoView(cardIndex) {
+        const cards = getCards();
+        const card = cards[cardIndex];
 
-        if (seeMoreBtn) {
-            seeMoreBtn.textContent = collapsed ? 'See more' : 'See less';
-            seeMoreBtn.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+        if (card) {
+            card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'start' });
         }
     }
 
-    function applyCollapsedState() {
-        if (!mediaGrid) return;
+    function updateVisibleCards() {
+        const cards = getCards();
+        const totalCards = cards.length;
 
-        const nextIsMobileLayout = window.innerWidth <= 768;
+        cards.forEach((card, index) => {
+            card.classList.toggle('hidden', index >= visibleCount);
+        });
 
-        if (isMobileLayout === null || nextIsMobileLayout !== isMobileLayout) {
-            isMobileLayout = nextIsMobileLayout;
-            setCollapsedState(nextIsMobileLayout);
+        mediaGrid.classList.toggle('collapsed', visibleCount <= initialVisibleCount);
+
+        if (totalCards <= initialVisibleCount) {
+            seeMoreBtn.style.display = 'none';
             return;
         }
 
-        if (!nextIsMobileLayout) {
-            setCollapsedState(false);
-        } else if (!mediaGrid.classList.contains('collapsed') && seeMoreBtn) {
-            seeMoreBtn.textContent = 'See less';
-            seeMoreBtn.setAttribute('aria-expanded', 'true');
-        }
+        seeMoreBtn.style.display = '';
+        seeMoreBtn.textContent = visibleCount < totalCards ? 'See more' : 'See less';
+        seeMoreBtn.setAttribute('aria-expanded', visibleCount < totalCards ? 'false' : 'true');
     }
 
-    if (seeMoreBtn && mediaGrid) {
-        seeMoreBtn.addEventListener('click', () => {
-            const collapsed = mediaGrid.classList.toggle('collapsed');
-            if (collapsed) {
-                seeMoreBtn.textContent = 'See more';
-                seeMoreBtn.setAttribute('aria-expanded', 'false');
-                mediaGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            } else {
-                seeMoreBtn.textContent = 'See less';
-                seeMoreBtn.setAttribute('aria-expanded', 'true');
-                mediaGrid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    function applyLayoutState() {
+        const nextIsMobileLayout = window.innerWidth <= 768;
+        const cards = getCards();
+
+        if (nextIsMobileLayout) {
+            if (isMobileLayout !== true) {
+                visibleCount = initialVisibleCount;
             }
-        });
+
+            isMobileLayout = true;
+            updateVisibleCards();
+
+            if (visibleCount > initialVisibleCount && cards[visibleCount - 1]) {
+                scrollCardIntoView(visibleCount - 1);
+            } else {
+                scrollCardIntoView(0);
+            }
+
+            return;
+        }
+
+        isMobileLayout = false;
+        visibleCount = cards.length;
+        cards.forEach((card) => card.classList.remove('hidden'));
+        seeMoreBtn.style.display = 'none';
+        seeMoreBtn.setAttribute('aria-expanded', 'true');
     }
 
-    applyCollapsedState();
-    window.addEventListener('resize', applyCollapsedState);
+    seeMoreBtn.addEventListener('click', () => {
+        if (window.innerWidth > 768) return;
+
+        const cards = getCards();
+        const totalCards = cards.length;
+
+        if (visibleCount >= totalCards) {
+            visibleCount = initialVisibleCount;
+            updateVisibleCards();
+            scrollCardIntoView(0);
+            return;
+        }
+
+        const nextVisibleCount = Math.min(visibleCount + revealStep, totalCards);
+        const nextFirstNewCardIndex = visibleCount;
+
+        visibleCount = nextVisibleCount;
+        updateVisibleCards();
+        scrollCardIntoView(nextFirstNewCardIndex);
+    });
+
+    applyLayoutState();
+    window.addEventListener('resize', applyLayoutState);
 });
 
 // ============================================
