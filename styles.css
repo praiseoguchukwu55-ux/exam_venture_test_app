@@ -1307,6 +1307,28 @@ body {
     text-decoration: underline;
 }
 
+.footer-install {
+    margin-top: 12px;
+}
+
+.install-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    background: rgba(255,255,255,0.06);
+    color: var(--white);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.install-link:hover {
+    background: rgba(255,255,255,0.12);
+}
+
 .theme-toggle {
     border: 1px solid var(--surface-border);
     background: var(--theme-toggle-bg);

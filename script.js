@@ -596,3 +596,37 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+    // ============================================
+    // PWA: Service Worker registration & Install prompt handling
+    // ============================================
+    let deferredInstallPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (event) => {
+        event.preventDefault();
+        deferredInstallPrompt = event;
+    });
+
+    document.addEventListener('click', async (event) => {
+        const installLink = event.target.closest && event.target.closest('#installAppLink');
+        if (!installLink) return;
+
+        event.preventDefault();
+
+        if (deferredInstallPrompt) {
+            deferredInstallPrompt.prompt();
+            await deferredInstallPrompt.userChoice;
+            deferredInstallPrompt = null;
+            return;
+        }
+
+        alert('To install this app, use your browser menu and choose Add to Home Screen or Install App.');
+    });
+
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('service-worker.js')
+                .then((registration) => console.log('Service worker registered.', registration))
+                .catch((error) => console.warn('Service worker registration failed:', error));
+        });
+    }
